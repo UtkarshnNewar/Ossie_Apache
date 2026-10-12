@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{
+  --bg:#f3f5fa; --card:#ffffff; --ink:#0f1b3d; --muted:#5b6785; --faint:#8a94ad; --line:#e2e7f1;
+  --accent:#2f5bea; --accent-soft:#e8eeff; --good:#0f9d6b; --bad:#d6334f; --warn:#b7791f;
+  --s1:#2f5bea; --s2:#0ea5a4; --s3:#f59e0b; --s4:#8b5cf6; --s5:#ec4899;
+  --shadow:0 1px 2px rgba(15,27,61,.06),0 10px 28px rgba(15,27,61,.06); --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0a0f20; --card:#131a30; --ink:#e8ecf8; --muted:#a3aecb; --faint:#7886a8; --line:#243052;
+        --accent:#7f9dff; --accent-soft:#1b2748; --good:#34d399; --bad:#fb7185; --warn:#fbbf24; --shadow:none;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px 56px}
+header{padding:28px 0 14px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{margin:4px 0 6px;font-size:28px;line-height:1.2;letter-spacing:-.01em}
+.sub{margin:0;color:var(--muted);max-width:760px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:600;border:1px solid transparent}
+.chip.plain{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 18px}
+nav.tabs button{background:none;border:0;padding:10px 14px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,.bar:focus-visible,select:focus-visible,.reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}
+.filters label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:150px}
+.reset{font:inherit;font-weight:600;color:var(--accent);background:none;border:0;padding:8px 6px;cursor:pointer}
+.active{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 12px}
+.active .chip button{all:unset;cursor:pointer;margin-left:2px;opacity:.7}
+.insight{background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:15.5px}
+.insight b{font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 14px 10px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi .lab{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.kpi .val{font-size:27px;font-weight:750;letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:12.5px;font-weight:650}
+.up{color:var(--good)} .down{color:var(--bad)} .flat{color:var(--faint)}
+.kpi .term{font-size:11.5px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi svg{display:block;width:100%;height:30px;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0;font-size:15.5px}
+.card .meaning{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;font-size:12px;color:var(--faint)}
+.tag{border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--muted);background:transparent;cursor:help}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c6{grid-column:span 6}.c4{grid-column:span 4}
+@media (max-width:980px){.c8,.c6,.c4{grid-column:span 12}}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:10px;align-items:center;background:none;border:0;padding:5px 6px;margin:0 -6px;border-radius:8px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.bar:hover{background:var(--accent-soft)}
+.bar.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.bar.dim{opacity:.45}
+.bar .nm{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{display:block;height:12px;background:var(--line);border-radius:6px;overflow:hidden;position:relative}
+.fill{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.fill.neg{background:var(--bad)}
+.bar .num{font-size:13px;font-variant-numeric:tabular-nums;font-weight:650;min-width:84px;text-align:right}
+.bar .num small{color:var(--faint);font-weight:500;margin-left:6px}
+.donutwrap{display:flex;flex-direction:column;gap:14px;align-items:center}
+.legend{width:100%}
+svg text{font-family:inherit}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.4;z-index:20;opacity:0;transition:opacity .08s;max-width:260px}
+.legendrow{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13.5px;background:none;border:0;width:100%;cursor:pointer;color:inherit;font-family:inherit;text-align:left}
+.sw{width:11px;height:11px;border-radius:3px;flex:none}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.foot{margin-top:22px;font-size:12.5px;color:var(--faint);display:flex;flex-wrap:wrap;gap:6px 16px}
+.badge{font-weight:700}.ok{color:var(--good)}.nope{color:var(--bad)}
+/* ontology tab */
+.layers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+@media (max-width:760px){.layers{grid-template-columns:1fr}}
+.layer{border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.layer .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.layer.l1 .k{color:var(--s4)} .layer.l2 .k{color:var(--accent)} .layer.l3 .k{color:var(--s2)}
+.layer h3{margin:4px 0 4px;font-size:16px}
+.layer p{margin:0;color:var(--muted);font-size:13.5px}
+.entities{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.ent h3{margin:0 0 2px;font-size:15.5px}
+.ent .src{font-size:12.5px;color:var(--faint);margin-bottom:8px}
+.ent table{width:100%;border-collapse:collapse;font-size:13px}
+.ent td{padding:5px 0;border-top:1px solid var(--line);vertical-align:top}
+.ent td:last-child{text-align:right;color:var(--faint);font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.sent{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+.sent:first-child{border-top:0}
+.sent .arrow{color:var(--accent);font-weight:800}
+.gloss{width:100%;border-collapse:collapse;font-size:13.5px}
+.gloss th{text-align:left;font-size:12px;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.gloss td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:var(--accent-soft);padding:1px 6px;border-radius:5px}
+.hidden{display:none}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Business view &middot; semantic model + ontology</div>
+    <h1 id="title">__TITLE__</h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="chips" id="sourcechips"></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="dash">Dashboard</button>
+    <button role="tab" aria-selected="false" data-tab="onto">Ontology: what it means</button>
+  </nav>
+
+  <section id="tab-dash">
+    <div class="filters" id="filters"></div>
+    <div class="active" id="active"></div>
+    <div class="insight" id="insight"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="card c12"><h2>Sales and profit over time</h2><div class="meaning" id="m-trend"></div><div id="trend"></div></div>
+      <div class="card c4"><h2>Sales by product category</h2><div class="meaning" id="m-cat"></div><div class="bars" id="cat"></div></div>
+      <div class="card c4"><h2>Sales by sales region</h2><div class="meaning" id="m-reg"></div><div class="bars" id="reg"></div></div>
+      <div class="card c4"><h2>Sales by customer segment</h2><div class="meaning" id="m-seg"></div><div class="donutwrap" id="seg"></div></div>
+      <div class="card c4"><h2>Top 10 states</h2><div class="meaning" id="m-st"></div><div class="bars" id="st"></div></div>
+      <div class="card c4"><h2>Profit margin by sub-category</h2><div class="meaning" id="m-sub"></div><div class="bars" id="sub"></div></div>
+      <div class="card c4"><h2>Top 10 customers</h2><div class="meaning" id="m-cust"></div><div class="bars" id="cust"></div></div>
+    </div>
+  </section>
+
+  <section id="tab-onto" class="hidden"></section>
+
+  <div class="foot" id="foot"></div>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<script>
+"use strict";
+const D = /*__DATA__*/null;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf0 = new Intl.NumberFormat("en-US", {maximumFractionDigits: 0});
+const compact = (v) => Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(2) + "M" : Math.abs(v) >= 1e4 ? (v / 1e3).toFixed(1) + "K" : nf0.format(v);
+const pct = (v, d = 1) => (v * 100).toFixed(d) + "%";
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const ymLabel = (ym) => MONTHS[(ym % 100) - 1] + " " + Math.floor(ym / 100);
+const PAL = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)", "var(--s5)"];
+
+// column positions in D.rows
+const C = {ym:0, ord:1, cust:2, cat:3, sub:4, reg:5, st:6, seg:7, sales:8, profit:9, qty:10, disc:11};
+const DIM = {cat:"Category", sub:"Sub_Category", reg:"Region", st:"State", seg:"Segment", cust:"Customer_Name"};
+const LABEL = {cat:"Product category", sub:"Sub-category", reg:"Sales region", st:"State", seg:"Customer segment", cust:"Customer"};
+const state = {year:null, reg:null, cat:null, seg:null, st:null, sub:null, cust:null};
+
+// ---------- ontology lookups ----------
+const O = D.ontology;
+const termFor = (table, col) => O && O.terms ? O.terms[(table + "." + col).toLowerCase()] : null;
+const dimTerm = (kind) => {
+  const t = {cat:["products","Category"], sub:["products","Sub_Category"], reg:["location","Region"],
+             st:["location","State"], seg:["orders","Segment"], cust:["customers","Customer_Name"]}[kind];
+  return t ? termFor(t[0], t[1]) : null;
+};
+const humanise = (s) => String(s).replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/_/g, " ");
+const niceMeasure = (n) => n.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+
+// ---------- aggregation ----------
+function pass(r, f, skip) {
+  if (f.year != null && Math.floor(r[C.ym] / 100) !== f.year) return false;
+  for (const k of ["reg","cat","seg","st","sub","cust"]) if (k !== skip && f[k] != null && r[C[k]] !== f[k]) return false;
+  return true;
+}
+function agg(rows) {
+  const o = new Set(), cu = new Set();
+  let sales = 0, profit = 0, qty = 0, disc = 0;
+  for (const r of rows) { o.add(r[C.ord]); cu.add(r[C.cust]); sales += r[C.sales]; profit += r[C.profit]; qty += r[C.qty]; disc += r[C.disc]; }
+  return {sales, profit, qty, orders:o.size, customers:cu.size, margin: sales ? profit / sales : 0, disc: rows.length ? disc / rows.length : 0, n: rows.length};
+}
+const subset = (f, skip) => D.rows.filter((r) => pass(r, f, skip));
+const group = (rows, kind) => { const m = new Map(); for (const r of rows) { const k = r[C[kind]]; (m.get(k) || m.set(k, []).get(k)).push(r); } return m; };
+
+const KPI = [
+  {key:"total_sales", lab:"Total sales", get:(a) => a.sales, fmt:compact, col:"Sales", table:"orders"},
+  {key:"total_profit", lab:"Total profit", get:(a) => a.profit, fmt:compact, col:"Profit", table:"orders"},
+  {key:"profit_margin", lab:"Profit margin", get:(a) => a.margin, fmt:(v) => pct(v), col:"Profit", table:"orders", ratio:true},
+  {key:"total_quantity", lab:"Units sold", get:(a) => a.qty, fmt:compact, col:"Quantity", table:"orders"},
+  {key:"order_count", lab:"Orders", get:(a) => a.orders, fmt:compact, col:"Order_ID", table:"orders"},
+  {key:"avg_discount", lab:"Average discount", get:(a) => a.disc, fmt:(v) => pct(v), col:"Discount", table:"orders", ratio:true},
+  {key:"customers", lab:"Customers", get:(a) => a.customers, fmt:compact, col:"Customer_ID", table:"customers", derived:true},
+];
+const measureDef = (key) => (D.measures || []).find((m) => m.name === key);
+
+// ---------- tooltip ----------
+const tip = $("tip");
+function showTip(e, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 10);
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = (e.clientY + 16) + "px";
+}
+const hideTip = () => { tip.style.opacity = 0; };
+
+// ---------- header ----------
+function renderHeader() {
+  const m = D.meta;
+  $("subtitle").textContent = "Every label and number here is tied to a business term from the ontology layer, " +
+    "so a figure is never just a column name. Data: " + nf0.format(m.rows) + " order lines, " + m.years[0] + "–" + m.years[m.years.length - 1] + ".";
+  const chips = [
+    ["Data", m.catalog + "." + m.schema],
+    ["Semantic model", D.metric_view || "none"],
+    ["Ontology", O ? O.info.ontology_name : "not pushed"],
+  ];
+  $("sourcechips").innerHTML = chips.map(([k, v]) => '<span class="chip"><span class="dot"></span>' + esc(k) + ': ' + esc(v) + '</span>').join("");
+}
+
+// ---------- filters ----------
+function renderFilters() {
+  const sel = (id, label, values, current, fmtv) =>
+    '<label>' + label + '<select data-f="' + id + '"><option value="">All</option>' +
+    values.map(([v, t]) => '<option value="' + esc(v) + '"' + (String(current) === String(v) ? " selected" : "") + ">" + esc(t) + "</option>").join("") +
+    "</select></label>";
+  const years = D.meta.years.map((y) => [y, y]);
+  const sorted = (arr) => arr.map((t, i) => [i, t]).sort((a, b) => a[1].localeCompare(b[1]));
+  $("filters").innerHTML =
+    sel("year", "Year", years, state.year) + sel("reg", "Sales region", sorted(D.dict.reg), state.reg) +
+    sel("cat", "Product category", sorted(D.dict.cat), state.cat) + sel("seg", "Customer segment", sorted(D.dict.seg), state.seg) +
+    '<button class="reset" id="reset">Reset all</button>';
+  $("filters").querySelectorAll("select").forEach((s) => s.addEventListener("change", () => {
+    const v = s.value === "" ? null : Number(s.value);
+    state[s.dataset.f] = v;
+    if (s.dataset.f === "cat") state.sub = null;
+    render();
+  }));
+  $("reset").addEventListener("click", () => { for (const k in state) state[k] = null; render(); });
+}
+function renderActive() {
+  const out = [];
+  const name = {sub:(i) => D.dict.sub[i], st:(i) => D.dict.st[i], cust:(i) => D.dict.cust[i]};
+  for (const k of ["sub", "st", "cust"]) if (state[k] != null)
+    out.push('<span class="chip">' + LABEL[k] + ": " + esc(name[k](state[k])) + ' <button data-clear="' + k + '" aria-label="Remove filter">×</button></span>');
+  $("active").innerHTML = out.join("");
+  $("active").querySelectorAll("[data-clear]").forEach((b) => b.addEventListener("click", () => { state[b.dataset.clear] = null; render(); }));
+}
+
+// ---------- KPI cards ----------
+function sparkline(vals, color) {
+  if (vals.length < 2) return "";
+  const w = 160, h = 30, mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn || 1;
+  const pts = vals.map((v, i) => [i / (vals.length - 1) * w, h - 3 - (v - mn) / span * (h - 8)]);
+  const path = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  return '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + path +
+         " L" + w + " " + h + " L0 " + h + 'Z" fill="' + color + '" opacity=".12"/><path d="' + path +
+         '" fill="none" stroke="' + color + '" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+}
+function renderKpis(rows, a) {
+  const byMonth = [...group(rows, "ym").entries()].sort((x, y) => x[0] - y[0]);
+  const prev = state.year != null && D.meta.years.includes(state.year - 1)
+    ? agg(subset({...state, year: state.year - 1})) : null;
+  $("kpis").innerHTML = KPI.map((k, i) => {
+    const v = k.get(a);
+    let delta = '<span class="delta flat">' + (state.year != null ? "no prior year" : "all years") + "</span>";
+    if (prev && prev.n) {
+      const pv = k.get(prev);
+      if (k.ratio) {
+        const d = v - pv, cls = Math.abs(d) < 0.0005 ? "flat" : d > 0 ? "up" : "down";
+        delta = '<span class="delta ' + cls + '">' + (d >= 0 ? "▲ " : "▼ ") + (Math.abs(d) * 100).toFixed(1) + " pts vs " + (state.year - 1) + "</span>";
+      } else if (pv) {
+        const d = v / pv - 1, cls = Math.abs(d) < 0.0005 ? "flat" : d > 0 ? "up" : "down";
+        delta = '<span class="delta ' + cls + '">' + (d >= 0 ? "▲ " : "▼ ") + (Math.abs(d) * 100).toFixed(1) + "% vs " + (state.year - 1) + "</span>";
+      }
+    }
+    const series = byMonth.map(([, rr]) => k.get(agg(rr)));
+    const t = termFor(k.table, k.col);
+    const md = measureDef(k.key);
+    const term = k.derived ? "Concept: Customer" : (t ? "Business term: " + t.term : (md ? md.comment : ""));
+    const tipHtml = md ? "<b>" + esc(niceMeasure(k.key)) + "</b><br>" + esc(md.comment || "") + "<br><code>" + esc(md.expr) + "</code>" : esc(k.lab);
+    return '<div class="kpi" data-i="' + i + '"><div class="lab"><span>' + esc(k.lab) + "</span></div>" +
+           '<div class="val">' + k.fmt(v) + "</div>" + delta +
+           sparkline(series, PAL[i % PAL.length]) + '<div class="term" title="' + esc(term) + '">' + esc(term) + "</div></div>";
+  }).join("");
+  $("kpis").querySelectorAll(".kpi").forEach((el) => {
+    const k = KPI[+el.dataset.i], md = measureDef(k.key);
+    el.addEventListener("mousemove", (e) => showTip(e, md ? "<b>" + esc(niceMeasure(k.key)) + "</b><br>" + esc(md.comment || "") + "<br><span style='opacity:.8'>" + esc(md.expr) + "</span>" : esc(k.lab)));
+    el.addEventListener("mouseleave", hideTip);
+  });
+}
+
+// ---------- meaning chips on each chart ----------
+function meaning(id, kind, extra) {
+  const t = dimTerm(kind);
+  const parts = [];
+  if (t) parts.push('<span class="tag" title="Source column ' + esc(t.source) + '">' + esc(t.entity) + " › " + esc(t.term) + "</span>");
+  parts.push('<span class="tag">' + (t ? "from " + esc(t.source) : "no ontology term") + "</span>");
+  if (extra) parts.push('<span>' + extra + "</span>");
+  $(id).innerHTML = parts.join("");
+}
+
+// ---------- bar lists ----------
+function renderBars(id, kind, opts) {
+  const rows = subset(state, kind);
+  const dict = D.dict[kind];
+  let items = [...group(rows, kind).entries()].map(([k, rr]) => {
+    const a = agg(rr);
+    return {k, name: dict[k], a, value: opts.value(a), share: 0};
+  });
+  const total = items.reduce((s, x) => s + Math.max(0, x.a.sales), 0) || 1;
+  items.forEach((x) => { x.share = x.a.sales / total; });
+  items.sort(opts.asc ? (x, y) => x.value - y.value : (x, y) => y.value - x.value);
+  items = items.slice(0, opts.top || 99);
+  const max = Math.max(...items.map((x) => Math.abs(x.value)), 1e-9);
+  const el = $(id);
+  if (!items.length) { el.innerHTML = '<div class="empty">No data for this selection</div>'; return; }
+  el.innerHTML = items.map((x) => {
+    const w = Math.max(2, Math.abs(x.value) / max * 100);
+    const sel = state[kind] === x.k, dim = state[kind] != null && !sel;
+    return '<button class="bar' + (sel ? " sel" : "") + (dim ? " dim" : "") + '" data-k="' + x.k + '" aria-pressed="' + sel + '">' +
+      '<span class="nm" title="' + esc(x.name) + '">' + esc(x.name) + '</span>' +
+      '<span class="track"><span class="fill' + (x.value < 0 ? " neg" : "") + '" style="width:' + w.toFixed(1) + '%"></span></span>' +
+      '<span class="num">' + opts.fmt(x.value) + (opts.share ? "<small>" + pct(x.share, 0) + "</small>" : "") + "</span></button>";
+  }).join("");
+  el.querySelectorAll(".bar").forEach((b, i) => {
+    const x = items[i];
+    b.addEventListener("click", () => {
+      const k = Number(b.dataset.k);
+      state[kind] = state[kind] === k ? null : k;
+      if (kind === "cat") state.sub = null;
+      if (kind === "sub") { if (state.sub != null) state.cat = Number(D.sub_cat[state.sub]); }
+      render();
+    });
+    b.addEventListener("mousemove", (e) => showTip(e, "<b>" + esc(x.name) + "</b><br>Sales " + compact(x.a.sales) + " · Profit " + compact(x.a.profit) +
+      "<br>Margin " + pct(x.a.margin) + " · " + nf0.format(x.a.orders) + " orders"));
+    b.addEventListener("mouseleave", hideTip);
+  });
+}
+
+// ---------- donut ----------
+function renderDonut(rows) {
+  const rr = subset(state, "seg");
+  const g = [...group(rr, "seg").entries()].map(([k, r]) => ({k, name: D.dict.seg[k], v: agg(r).sales})).sort((a, b) => b.v - a.v);
+  const total = g.reduce((s, x) => s + x.v, 0);
+  const el = $("seg");
+  if (!total) { el.innerHTML = '<div class="empty">No data for this selection</div>'; return; }
+  const R = 54, CIR = 2 * Math.PI * R;
+  let off = 0;
+  const arcs = g.map((x, i) => {
+    const len = x.v / total * CIR;
+    const s = '<circle r="' + R + '" cx="70" cy="70" fill="none" stroke="' + PAL[i % PAL.length] + '" stroke-width="22" ' +
+              'stroke-dasharray="' + len.toFixed(2) + " " + (CIR - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) +
+              '" transform="rotate(-90 70 70)" opacity="' + (state.seg != null && state.seg !== x.k ? .25 : 1) + '"/>';
+    off += len; return s;
+  }).join("");
+  el.innerHTML = '<svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Sales by customer segment">' + arcs +
+    '<text x="70" y="66" text-anchor="middle" font-size="19" font-weight="750" fill="var(--ink)">' + compact(total) + '</text>' +
+    '<text x="70" y="84" text-anchor="middle" font-size="11" fill="var(--faint)">sales</text></svg><div class="legend">' +
+    g.map((x, i) => '<button class="legendrow" data-k="' + x.k + '"><span class="sw" style="background:' + PAL[i % PAL.length] + '"></span><span style="flex:1">' +
+      esc(x.name) + '</span><b>' + pct(x.v / total, 0) + '</b></button>').join("") + "</div>";
+  el.querySelectorAll(".legendrow").forEach((b) => b.addEventListener("click", () => {
+    const k = Number(b.dataset.k); state.seg = state.seg === k ? null : k; render();
+  }));
+}
+
+// ---------- trend ----------
+function renderTrend(rows) {
+  const g = [...group(rows, "ym").entries()].sort((a, b) => a[0] - b[0]).map(([ym, r]) => ({ym, a: agg(r)}));
+  const el = $("trend");
+  if (g.length < 2) { el.innerHTML = '<div class="empty">Select a wider period to see a trend</div>'; return; }
+  const W = 1180, H = 300, L = 54, Rr = 14, T = 14, B = 32;
+  const nice = (v) => { if (v <= 0) return 0; const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p;
+                       return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; };
+  const mx = nice(Math.max(...g.map((x) => x.a.sales), 1)), rawMin = Math.min(0, ...g.map((x) => x.a.profit));
+  const mn = rawMin < 0 ? -nice(-rawMin) : 0;
+  const X = (i) => L + i / (g.length - 1) * (W - L - Rr);
+  const Y = (v) => T + (1 - (v - mn) / (mx - mn || 1)) * (H - T - B);
+  const line = (key) => g.map((x, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(x.a[key]).toFixed(1)).join(" ");
+  const stepV = nice((mx - mn) / 4) || 1, grid = [];
+  for (let v = Math.ceil(mn / stepV) * stepV; v <= mx + 1e-9; v += stepV) {
+    const y = Y(v);
+    grid.push('<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)"/><text x="' + (L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="12" fill="var(--faint)">' + compact(v) + "</text>");
+  }
+  const step = Math.ceil(g.length / 8), xl = [];
+  g.forEach((x, i) => { if (i % step === 0 || x.ym % 100 === 1) xl.push('<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--faint)">' + (x.ym % 100 === 1 ? Math.floor(x.ym / 100) : ymLabel(x.ym).split(" ")[0]) + "</text>"); });
+  const zero = mn < 0 ? '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="var(--faint)" stroke-dasharray="3 3"/>' : "";
+  el.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="Monthly sales and profit">' + grid.join("") + zero +
+    '<path d="' + line("sales") + " L" + X(g.length - 1) + " " + Y(0 < mn ? mn : 0) + " L" + X(0) + " " + Y(0 < mn ? mn : 0) + 'Z" fill="var(--s1)" opacity=".10"/>' +
+    '<path d="' + line("sales") + '" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round"/>' +
+    '<path d="' + line("profit") + '" fill="none" stroke="var(--s2)" stroke-width="2.4" stroke-linejoin="round"/>' + xl.join("") +
+    '<g id="hov" style="display:none"><line id="hl" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--faint)"/><circle id="hs" r="4.5" fill="var(--s1)"/><circle id="hp" r="4.5" fill="var(--s2)"/></g>' +
+    '<rect id="hit" x="' + L + '" y="' + T + '" width="' + (W - L - Rr) + '" height="' + (H - T - B) + '" fill="transparent"/></svg>' +
+    '<div style="display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:4px"><span><span class="sw" style="background:var(--s1);display:inline-block;margin-right:6px"></span>Sales</span><span><span class="sw" style="background:var(--s2);display:inline-block;margin-right:6px"></span>Profit</span></div>';
+  const svg = el.querySelector("svg"), hit = $("hit");
+  hit.addEventListener("mousemove", (e) => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(g.length - 1, Math.round((px - L) / (W - L - Rr) * (g.length - 1))));
+    const x = g[i];
+    $("hov").style.display = "";
+    $("hl").setAttribute("x1", X(i)); $("hl").setAttribute("x2", X(i));
+    $("hs").setAttribute("cx", X(i)); $("hs").setAttribute("cy", Y(x.a.sales));
+    $("hp").setAttribute("cx", X(i)); $("hp").setAttribute("cy", Y(x.a.profit));
+    showTip(e, "<b>" + ymLabel(x.ym) + "</b><br>Sales " + compact(x.a.sales) + "<br>Profit " + compact(x.a.profit) + " (" + pct(x.a.margin) + ")<br>" + nf0.format(x.a.orders) + " orders");
+  });
+  hit.addEventListener("mouseleave", () => { $("hov").style.display = "none"; hideTip(); });
+}
+
+// ---------- insight sentence ----------
+function renderInsight(rows, a) {
+  if (!a.n) { $("insight").innerHTML = "No order lines match this selection."; return; }
+  const parts = [];
+  const scope = state.year != null ? "In <b>" + state.year + "</b>" : "Across <b>" + D.meta.years[0] + "–" + D.meta.years[D.meta.years.length - 1] + "</b>";
+  parts.push(scope + ", <b>" + compact(a.sales) + "</b> of sales from <b>" + nf0.format(a.orders) + "</b> orders and <b>" + nf0.format(a.customers) + "</b> customers, at a profit margin of <b>" + pct(a.margin) + "</b>.");
+  const cats = [...group(rows, "cat").entries()].map(([k, r]) => ({n: D.dict.cat[k], s: agg(r).sales})).sort((x, y) => y.s - x.s);
+  if (cats.length > 1) parts.push("<b>" + esc(cats[0].n) + "</b> leads with " + pct(cats[0].s / a.sales, 0) + " of sales.");
+  const subs = [...group(rows, "sub").entries()].map(([k, r]) => ({n: D.dict.sub[k], a: agg(r)})).filter((x) => x.a.sales > 0);
+  const loss = subs.filter((x) => x.a.profit < 0).sort((x, y) => x.a.profit - y.a.profit);
+  if (loss.length) parts.push("<b>" + esc(loss[0].n) + "</b> is losing money (" + compact(loss[0].a.profit) + " profit, " + pct(loss[0].a.margin) + " margin)" + (loss.length > 1 ? "; " + (loss.length - 1) + " other sub-categor" + (loss.length > 2 ? "ies are" : "y is") + " also below zero." : "."));
+  $("insight").innerHTML = parts.join(" ");
+}
+
+// ---------- ontology tab ----------
+function renderOntology() {
+  const el = $("tab-onto");
+  if (!O) { el.innerHTML = '<div class="card empty">The ontology tables were not found in this schema. Run <code>ontology push</code> first, then rebuild this page.</div>'; return; }
+  const ents = O.concepts.filter((c) => c.concept_type === "EntityType");
+  const links = O.relationships.filter((r) => r.relationship_kind === "link");
+  const nVT = O.concepts.length - ents.length;
+  const clean = (s) => esc(String(s).replace(/\{([^}]+)\}/g, (_, n) => humanise(n)));
+
+  // concept map: the entity with most outgoing links in the centre, the rest on a ring
+  const outCount = (c) => links.filter((l) => l.concept === c).length;
+  const centre = ents.slice().sort((a, b) => outCount(b.concept) - outCount(a.concept))[0];
+  const ring = ents.filter((e) => e !== centre);
+  const W = 760, H = 420, cx = W / 2, cy = H / 2, rx = 300, ry = 165, pos = {};
+  pos[centre.concept] = [cx, cy];
+  ring.forEach((e, i) => { const ang = -Math.PI / 2 + i / ring.length * 2 * Math.PI; pos[e.concept] = [cx + rx * Math.cos(ang), cy + ry * Math.sin(ang)]; });
+  const box = (c, main) => {
+    const [x, y] = pos[c.concept], w = main ? 170 : 140, h = main ? 54 : 44;
+    return '<g><rect x="' + (x - w / 2) + '" y="' + (y - h / 2) + '" width="' + w + '" height="' + h + '" rx="12" fill="' + (main ? "var(--accent)" : "var(--card)") +
+      '" stroke="' + (main ? "var(--accent)" : "var(--line)") + '" stroke-width="1.5"/><text x="' + x + '" y="' + (y - (c.dataset ? 2 : -4)) + '" text-anchor="middle" font-size="14" font-weight="700" fill="' + (main ? "#fff" : "var(--ink)") + '">' + esc(c.business_name) + "</text>" +
+      (c.dataset ? '<text x="' + x + '" y="' + (y + 15) + '" text-anchor="middle" font-size="11" fill="' + (main ? "rgba(255,255,255,.8)" : "var(--faint)") + '">table: ' + esc(c.dataset) + "</text>" : "") + "</g>";
+  };
+  const edges = links.filter((l) => pos[l.concept] && pos[l.related_concept]).map((l) => {
+    const [x1, y1] = pos[l.concept], [x2, y2] = pos[l.related_concept];
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const label = humanise(l.relationship);
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="var(--accent)" stroke-width="1.6" opacity=".55"/>' +
+      '<g><rect x="' + (mx - label.length * 3.6 - 8) + '" y="' + (my - 11) + '" width="' + (label.length * 7.2 + 16) + '" height="22" rx="11" fill="var(--card)" stroke="var(--line)"/><text x="' + mx + '" y="' + (my + 4) + '" text-anchor="middle" font-size="12" fill="var(--accent)" font-weight="650">' + esc(label) + "</text></g>";
+  }).join("");
+  const map = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="Concept map">' + edges + ents.map((e) => box(e, e === centre)).join("") + "</svg>";
+
+  // entity cards: business term -> source column
+  const cards = ents.map((e) => {
+    const attrs = O.mappings.filter((m) => m.concept === e.concept && (m.kind === "attribute" || m.kind === "identifier"));
+    return '<div class="card ent"><h3>' + esc(e.business_name) + '</h3><div class="src">Source table <code>' + esc(e.dataset) + "</code>" +
+      (e.identified_by ? " &middot; identified by " + esc(humanise(e.identified_by)) : "") + "</div><table>" +
+      attrs.map((m) => "<tr><td>" + esc(humanise(m.target_concept)) + (m.kind === "identifier" ? ' <span class="faint">(identifier)</span>' : "") + "</td><td>" + esc(m.column_name) + "</td></tr>").join("") + "</table></div>";
+  }).join("");
+
+  const gloss = (D.measures || []).map((m) => "<tr><td><b>" + esc(niceMeasure(m.name)) + "</b></td><td>" + esc(m.comment || "") + "</td><td>" +
+      (m.terms && m.terms.length ? m.terms.map((t) => '<span class="tag">' + esc(t) + "</span>").join(" ") : '<span class="faint">counts rows</span>') +
+      "</td><td><code>" + esc(m.expr) + "</code></td></tr>").join("");
+
+  el.innerHTML =
+    '<div class="layers">' +
+      '<div class="layer l1"><div class="k">Layer 3 &middot; Ontology</div><h3>' + ents.length + " concepts, " + links.length + " links</h3><p>What things <b>mean</b>: business names, how they relate, in sentences people use. " + nVT + " business terms.</p></div>" +
+      '<div class="layer l2"><div class="k">Layer 2 &middot; Semantic model</div><h3>' + (D.measures || []).length + " measures</h3><p>How to <b>calculate</b>: joins and measures in the Metric View <code>" + esc(D.metric_view || "n/a") + "</code>.</p></div>" +
+      '<div class="layer l3"><div class="k">Layer 1 &middot; Data</div><h3>' + ents.length + " tables, " + nf0.format(D.meta.rows) + " order lines</h3><p>The <b>facts</b>, in <code>" + esc(D.meta.catalog + "." + D.meta.schema) + "</code>.</p></div>" +
+    "</div>" +
+    '<div class="grid">' +
+      '<div class="card c8"><h2>Concept map</h2><p class="muted" style="margin:4px 0 8px">How the business concepts connect. Each line is a relationship stored in the ontology.</p>' + map + "</div>" +
+      '<div class="card c4"><h2>In plain sentences</h2><p class="muted" style="margin:4px 0 8px">The relationships, as the ontology verbalises them.</p>' +
+        (links.map((l) => '<div class="sent"><span class="arrow">→</span><div>' + clean(l.verbalization) + '<div class="faint" style="font-size:12px">' + esc(l.multiplicity) + "</div></div></div>").join("") || '<div class="empty">No relationships</div>') + "</div>" +
+    "</div>" +
+    '<h2 style="margin:22px 0 10px;font-size:17px">Business terms and where they come from</h2><div class="entities">' + cards + "</div>" +
+    '<div class="card" style="margin-top:14px"><h2>Measure glossary</h2><p class="muted" style="margin:4px 0 8px">Each KPI on the dashboard, its business definition, the ontology terms it is built from, and its formula in the Metric View.</p>' +
+      '<div style="overflow-x:auto"><table class="gloss"><thead><tr><th>Measure</th><th>Definition</th><th>Built from business term</th><th>Formula</th></tr></thead><tbody>' + gloss + "</tbody></table></div></div>";
+}
+
+// ---------- footer ----------
+function renderFoot() {
+  const all = agg(D.rows), h = D.headline || {};
+  const checks = [["total_sales", all.sales], ["total_profit", all.profit], ["total_quantity", all.qty], ["order_count", all.orders]]
+    .filter(([k]) => h[k] != null);
+  const ok = checks.length && checks.every(([k, v]) => Math.abs(v - h[k]) < 0.01 * Math.max(1, Math.abs(h[k])) / 100 + 0.01);
+  const when = new Date(D.meta.built_at);
+  $("foot").innerHTML =
+    (checks.length ? '<span class="badge ' + (ok ? "ok" : "nope") + '">' + (ok ? "✓ Totals match the Metric View" : "⚠ Totals differ from the Metric View") + "</span>" : "") +
+    "<span>Snapshot built " + when.toLocaleString() + "</span><span>Rebuild: <code>python tools/build_dashboard.py</code></span>";
+}
+
+// ---------- main ----------
+function render() {
+  renderFilters(); renderActive();
+  const rows = subset(state), a = agg(rows);
+  renderInsight(rows, a); renderKpis(rows, a); renderTrend(rows); renderDonut(rows);
+  meaning("m-trend", "cat", "monthly, all selected filters applied");
+  $("m-trend").innerHTML = '<span class="tag">Sales Transaction › Order Date</span><span class="tag">monthly</span>';
+  meaning("m-seg", "seg"); meaning("m-cat", "cat"); meaning("m-reg", "reg"); meaning("m-st", "st");
+  meaning("m-sub", "sub", "negative = losing money"); meaning("m-cust", "cust");
+  renderBars("cat", "cat", {value:(x) => x.sales, fmt:compact, share:true});
+  renderBars("reg", "reg", {value:(x) => x.sales, fmt:compact, share:true});
+  renderBars("st", "st", {value:(x) => x.sales, fmt:compact, top:10});
+  renderBars("sub", "sub", {value:(x) => x.margin, fmt:(v) => pct(v), asc:true, top:10});
+  renderBars("cust", "cust", {value:(x) => x.sales, fmt:compact, top:10});
+}
+document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-selected", x === b));
+  $("tab-dash").classList.toggle("hidden", b.dataset.tab !== "dash");
+  $("tab-onto").classList.toggle("hidden", b.dataset.tab !== "onto");
+}));
+renderHeader(); renderOntology(); render(); renderFoot();
+if (location.hash === "#ontology") document.querySelector('nav.tabs button[data-tab="onto"]').click();
+</script>
+</body>
+</html>

@@ -641,6 +641,33 @@ comments, tags, links). How well Genie answers a given business word was **not**
 the questions above and keep the answers that matter as examples in the space. Writing business
 synonyms into the Metric View itself is not done yet (section 6.5).
 
+#### 2.4e A dashboard of the result (one HTML file)
+
+Once the data, the Metric View and the ontology are in Databricks, one command turns them into a
+designed, self-contained dashboard (no internet or libraries needed; open it in any browser):
+
+```
+python tools/build_dashboard.py --connection dbx-main --catalog workspace --schema sales_dashboard_fabric --out output_models/Sales_Dashboard_fabric/Sales_Dashboard_fabric_dashboard.html
+```
+
+It only **reads** from Databricks (nothing is written). The file has two tabs:
+
+| Tab | What it shows |
+|---|---|
+| Dashboard | KPI cards (the six Metric View measures plus customers) with year-on-year change, trend, and bars by category, region, segment, state, sub-category margin and top customers. Filters and click-to-filter on every chart. Each chart carries its ontology term, e.g. *Product > Product Category, from products.Category*. |
+| Ontology: what it means | The three layers (ontology, semantic model, data), a concept map with the relationship sentences, every business term with its source column, and a glossary of the measures with their formulas. |
+
+Notes: the page is a **snapshot** taken when it is built (rebuild to refresh); the footer shows
+whether its totals match the Metric View. It expects the Sales shape (orders, customers, products,
+location) and stops with a clear message if a table or column is missing. Numbers carry no
+currency symbol because the model does not define a currency.
+
+**Prompt way**
+
+> Build the HTML dashboard for schema `workspace.sales_dashboard_fabric` with
+> `tools/build_dashboard.py` using connection `dbx-main`, save it next to the Ossie model, and
+> tell me whether its totals match the Metric View.
+
 ### 2.5 Check it in Databricks
 
 After an `--execute` run, in a Databricks SQL editor:
@@ -934,4 +961,5 @@ the right table. Writing business names into the Metric View's own synonyms is n
 | Dry-run ontology push | `python -m ossie_hub ontology push --from-yaml <ontology.yaml> --catalog <c> --schema <s> --connection dbx-main` |
 | Execute | add `--execute` (put it at the very end of the same command; `--overwrite` only if replacing is intended) |
 | Hand the folder over | delete `ossie_hub/connectors/*/connections/*.json` and `.ossie_hub/` first (section 1.5) |
+| Dashboard (HTML) | `python tools/build_dashboard.py --connection dbx-main --catalog <c> --schema <s> --out <file.html>` |
 | Genie | Databricks UI: *Genie → New → All / Metric views tabs* (section 2.4d) |
