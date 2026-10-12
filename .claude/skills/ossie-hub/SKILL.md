@@ -1,6 +1,6 @@
 ---
 name: ossie-hub
-description: Guides a user, step by step, through moving a Power BI / Microsoft Fabric semantic model, its data and its business ontology into Databricks (and a Genie space) with the ossie_hub tool in this repo. Use whenever the user mentions Ossie, ossie_hub, a .pbix file, Fabric, Databricks, semantic model, ontology, Metric View, Genie, "convert my model", "transfer to Databricks", or "connect to Fabric/Databricks".
+description: Guides a user, step by step, through moving a Power BI / Microsoft Fabric semantic model, its data and its business ontology into Databricks (and a Genie space) with the ossie_hub tool in this repo. Use whenever the user mentions Ossie, ossie_hub, a .pbix file, Fabric, Databricks, semantic model, ontology, Metric View, Genie, "convert my model", "transfer to Databricks", "connect to Fabric/Databricks", or asks for a dashboard or HTML report of the result.
 ---
 
 # Ossie Hub assistant
@@ -30,7 +30,10 @@ and `docs/Instruction.pdf`.
 5. **Never delete or drop** anything (schemas, tables, files) unless the user asks, and look at
    the target first.
 6. **Do not edit generated files by hand** (`output_models/**`). Regenerate with the command.
-7. **Report outcomes honestly:** failed tests, `BAD` verification lines, validation FAILED,
+7. **A generated dashboard contains the row-level data** (customer names, orders). Do not commit or
+   push a dashboard built from real or sensitive data to a public repository, and say so when
+   offering to publish one. Ask where it may be shared.
+8. **Report outcomes honestly:** failed tests, `BAD` verification lines, validation FAILED,
    or "not tested" (for example how Genie answers) are stated plainly.
 
 ## Start by asking
@@ -64,6 +67,7 @@ test command in reference.md; it should end in `OK`.
 | 7 | Send the ontology | `ontology push ...` (dry run, then `--execute`) | step 6 first |
 | 8 | Connect Genie | Databricks UI (see below) | step 7 |
 | 9 | Check | SQL queries in reference.md | step 6/7 |
+| 10 | Dashboard (optional) | `python tools/build_dashboard.py ...` writes one HTML file | steps 6 and 7 |
 
 Skip steps already done. Do them in order. After each command: say in one or two sentences what
 it did, show the key numbers, and ask before the next step.
@@ -87,6 +91,13 @@ it did, show the key numbers, and ask before the next step.
   error: viewer-driven DAX (`ALLSELECTED`, slicer titles) cannot be a model-level measure.
 - **Verification:** after `migrate --execute` it prints `OK`/`BAD` per measure. Any `BAD` means
   stop and investigate; do not call the transfer successful.
+- **Dashboard (step 10):** `python tools/build_dashboard.py --connection <name> --catalog <c> --schema <s> --out <file.html>`
+  only reads from Databricks and writes one self-contained HTML file (Dashboard tab plus an Ontology
+  tab with the concept map, business terms and measure glossary). It is a **snapshot**: rebuild to
+  refresh. It expects the Sales shape (orders, customers, products, location) and stops with a
+  message if a table or column is missing; do not hand-edit the HTML to work around that. Run it
+  only after the transfer and the ontology push. Check the footer says the totals match the
+  Metric View, and report it if it does not. Open it by double-clicking the file; no server needed.
 - **Genie (step 8)** is done in the Databricks UI: Genie > New > **All** tab for tables
   (`orders`/fact, dimensions, the four `ontology_*`) and the **Metric views** tab for the Metric
   View, then Create. Say clearly that answer quality has not been measured; suggest trying

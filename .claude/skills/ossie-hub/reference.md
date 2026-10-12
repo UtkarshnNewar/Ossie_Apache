@@ -76,6 +76,20 @@ Add `--execute` to write. Creates `ontology_info`, `ontology_concepts`, `ontolog
 comments. A table with one of these names that ossie_hub did not create is never replaced
 without `--overwrite`. An incomplete ontology is refused before anything is sent.
 
+## Dashboard (one HTML file, read-only on Databricks)
+
+```
+python tools/build_dashboard.py --connection dbx-main --catalog <catalog> --schema <schema> --out output_models/<name>/<name>_dashboard.html
+```
+Optional: `--title "<page title>"`, `--metric-view <name>` (default: the first Metric View in the schema).
+- Needs the data tables, the Metric View and, for the Ontology tab, the four `ontology_*` tables
+  (run the transfer and the ontology push first). Without them it still works but says so.
+- Expects the Sales shape: `orders`, `customers`, `products`, `location` with the standard columns.
+  Otherwise it stops: `error: <table> is missing [...]`.
+- It refuses if a join would drop or duplicate rows (row count must equal `orders`).
+- The file embeds every order line (customer names included): keep real data out of public repos.
+- The page template is `tools/dashboard_template.html`; the footer compares totals with the Metric View.
+
 ## Checks in Databricks (SQL editor)
 
 ```sql
@@ -100,6 +114,8 @@ Metric View measures are read with `MEASURE(<name>)`.
 | `[Schema] ... 'semantic_model' was unexpected` | Old wrapped file; re-run the conversion (our commands read both shapes) |
 | `.pbix` yields no data | It is a live connection: use `pbix <file> --connection fab-main` |
 | Ontology tables exist but a data table has no comment | Data was not in the schema at push time: do the transfer, then push again |
+| `error: <table> is missing [...]` from build_dashboard | The schema is not the Sales shape (or the transfer is incomplete). Check the tables with `SHOW TABLES`; do not edit the page |
+| Dashboard footer says totals differ from the Metric View | Stop and investigate (data changed after the build, or a join problem); rebuild first |
 | Genie "For you" tab shows only a few tables | Use the **All** tab and the **Metric views** tab |
 
 ## Facts worth knowing
@@ -114,5 +130,7 @@ Metric View measures are read with `MEASURE(<name>)`.
 - Sales_Dashboard sample: 23 of 31 measures translate; the other 8 use `ALLSELECTED`.
 - Genie answer quality for business synonyms has not been measured; Metric View synonyms are not
   written yet.
+- The dashboard is a snapshot of the data at build time; the Ontology tab reads the pushed
+  `ontology_*` tables, so it reflects what is in Databricks, not the YAML file.
 - Handover: before giving a folder to someone, delete the personal connection files and
   `.ossie_hub/` (guide section 1.5). Sharing through Git never includes them.
