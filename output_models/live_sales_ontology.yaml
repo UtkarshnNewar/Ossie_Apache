@@ -1,0 +1,595 @@
+# yaml-language-server: $schema=../ontology/ontology.json
+# Ontology derived from live_sales_ossie.yaml (ossie_hub.ontology)
+# Business names live in the tables at the top of ossie_hub/ontology.py.
+version: 0.2.0.dev0
+name: sales_ontology
+description: 'Business ontology of ''sales'': the business vocabulary (concepts) and how the SalesTransaction fact
+  relates to its dimensions (Customer, Product, Location).'
+ontology:
+- concept: TransactionId
+  type: ValueType
+  extends:
+  - Integer
+- concept: OrderNumber
+  type: ValueType
+  extends:
+  - String
+- concept: OrderDate
+  type: ValueType
+  extends:
+  - DateTime
+- concept: ShipDate
+  type: ValueType
+  extends:
+  - DateTime
+- concept: ShipMode
+  type: ValueType
+  extends:
+  - String
+- concept: CustomerSegment
+  type: ValueType
+  extends:
+  - String
+- concept: SalesAmount
+  type: ValueType
+  extends:
+  - Float
+- concept: QuantitySold
+  type: ValueType
+  extends:
+  - Integer
+- concept: DiscountRate
+  type: ValueType
+  extends:
+  - Float
+- concept: ProfitAmount
+  type: ValueType
+  extends:
+  - Float
+- concept: CustomerId
+  type: ValueType
+  extends:
+  - String
+- concept: CustomerName
+  type: ValueType
+  extends:
+  - String
+- concept: ProductId
+  type: ValueType
+  extends:
+  - String
+- concept: ProductCategory
+  type: ValueType
+  extends:
+  - String
+- concept: ProductSubCategory
+  type: ValueType
+  extends:
+  - String
+- concept: ProductName
+  type: ValueType
+  extends:
+  - String
+- concept: PostalCode
+  type: ValueType
+  extends:
+  - Integer
+- concept: City
+  type: ValueType
+  extends:
+  - String
+- concept: State
+  type: ValueType
+  extends:
+  - String
+- concept: SalesRegion
+  type: ValueType
+  extends:
+  - String
+- concept: Country
+  type: ValueType
+  extends:
+  - String
+- concept: SalesTransaction
+  type: EntityType
+  description: 'Business name: Sales Transaction. (fact; source dataset ''orders'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: TransactionId
+    verbalizes:
+    - '{SalesTransaction} is identified by {TransactionId}'
+    multiplicity: OneToOne
+  - name: order_number
+    roles:
+    - concept: OrderNumber
+    verbalizes:
+    - '{SalesTransaction} has {OrderNumber}'
+    multiplicity: ManyToOne
+  - name: ordered_on
+    roles:
+    - concept: OrderDate
+    verbalizes:
+    - '{SalesTransaction} has {OrderDate}'
+    multiplicity: ManyToOne
+  - name: shipped_on
+    roles:
+    - concept: ShipDate
+    verbalizes:
+    - '{SalesTransaction} has {ShipDate}'
+    multiplicity: ManyToOne
+  - name: ship_mode
+    roles:
+    - concept: ShipMode
+    verbalizes:
+    - '{SalesTransaction} has {ShipMode}'
+    multiplicity: ManyToOne
+  - name: segment
+    roles:
+    - concept: CustomerSegment
+    verbalizes:
+    - '{SalesTransaction} has {CustomerSegment}'
+    multiplicity: ManyToOne
+  - name: sales_amount
+    roles:
+    - concept: SalesAmount
+    verbalizes:
+    - '{SalesTransaction} has {SalesAmount}'
+    multiplicity: ManyToOne
+  - name: quantity
+    roles:
+    - concept: QuantitySold
+    verbalizes:
+    - '{SalesTransaction} has {QuantitySold}'
+    multiplicity: ManyToOne
+  - name: discount
+    roles:
+    - concept: DiscountRate
+    verbalizes:
+    - '{SalesTransaction} has {DiscountRate}'
+    multiplicity: ManyToOne
+  - name: profit
+    roles:
+    - concept: ProfitAmount
+    verbalizes:
+    - '{SalesTransaction} has {ProfitAmount}'
+    multiplicity: ManyToOne
+  - name: placed_by
+    description: 'Each SalesTransaction belongs to exactly one Customer (many SalesTransaction records per Customer).
+      Join: orders.Customer_ID = customers.Customer_ID.'
+    roles:
+    - concept: Customer
+    verbalizes:
+    - '{SalesTransaction} is placed by {Customer}'
+    - '{Customer} places {SalesTransaction}'
+    multiplicity: ManyToOne
+  - name: for_product
+    description: 'Each SalesTransaction belongs to exactly one Product (many SalesTransaction records per Product).
+      Join: orders.Product_ID = products.Product_ID.'
+    roles:
+    - concept: Product
+    verbalizes:
+    - '{SalesTransaction} is for {Product}'
+    - '{Product} is sold in {SalesTransaction}'
+    multiplicity: ManyToOne
+  - name: delivered_to
+    description: 'Each SalesTransaction belongs to exactly one Location (many SalesTransaction records per Location).
+      Join: orders.Postal_Code = location.Postal_Code.'
+    roles:
+    - concept: Location
+    verbalizes:
+    - '{SalesTransaction} is delivered to {Location}'
+    - '{Location} receives {SalesTransaction}'
+    multiplicity: ManyToOne
+- concept: Customer
+  type: EntityType
+  description: 'Business name: Customer. (dimension; source dataset ''customers'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: CustomerId
+    verbalizes:
+    - '{Customer} is identified by {CustomerId}'
+    multiplicity: OneToOne
+  - name: name
+    roles:
+    - concept: CustomerName
+    verbalizes:
+    - '{Customer} has {CustomerName}'
+    multiplicity: ManyToOne
+- concept: Product
+  type: EntityType
+  description: 'Business name: Product. (dimension; source dataset ''products'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: ProductId
+    verbalizes:
+    - '{Product} is identified by {ProductId}'
+    multiplicity: OneToOne
+  - name: category
+    roles:
+    - concept: ProductCategory
+    verbalizes:
+    - '{Product} has {ProductCategory}'
+    multiplicity: ManyToOne
+  - name: sub_category
+    roles:
+    - concept: ProductSubCategory
+    verbalizes:
+    - '{Product} has {ProductSubCategory}'
+    multiplicity: ManyToOne
+  - name: name
+    roles:
+    - concept: ProductName
+    verbalizes:
+    - '{Product} has {ProductName}'
+    multiplicity: ManyToOne
+- concept: Location
+  type: EntityType
+  description: 'Business name: Location. (dimension; source dataset ''location'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: PostalCode
+    verbalizes:
+    - '{Location} is identified by {PostalCode}'
+    multiplicity: OneToOne
+  - name: city
+    roles:
+    - concept: City
+    verbalizes:
+    - '{Location} has {City}'
+    multiplicity: ManyToOne
+  - name: state
+    roles:
+    - concept: State
+    verbalizes:
+    - '{Location} has {State}'
+    multiplicity: ManyToOne
+  - name: region
+    roles:
+    - concept: SalesRegion
+    verbalizes:
+    - '{Location} has {SalesRegion}'
+    multiplicity: ManyToOne
+  - name: country
+    roles:
+    - concept: Country
+    verbalizes:
+    - '{Location} has {Country}'
+    multiplicity: ManyToOne
+ontology_mappings:
+- name: sales_mapping
+  description: Binds each ontology concept and relationship to fields of the semantic model it was derived from.
+  semantic_model:
+    version: "0.2.0.dev0"
+    name: sales
+    datasets:
+    - name: customers
+      source: Lakehouse_1.Schema2.customers
+      fields:
+      - name: Customer_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Customer_ID
+        datatype: String
+      - name: Customer_Name
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Customer_Name
+        datatype: String
+      primary_key:
+      - Customer_ID
+    - name: products
+      source: Lakehouse_1.Schema2.products
+      fields:
+      - name: Product_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Product_ID
+        datatype: String
+      - name: Category
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Category
+        datatype: String
+      - name: Sub_Category
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Sub_Category
+        datatype: String
+      - name: Product_Name
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Product_Name
+        datatype: String
+      primary_key:
+      - Product_ID
+    - name: orders
+      source: Lakehouse_1.Schema2.orders
+      fields:
+      - name: Row_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Row_ID
+        datatype: Integer
+      - name: Order_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Order_ID
+        datatype: String
+      - name: Order_Date
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Order_Date
+        datatype: DateTime
+        dimension:
+          is_time: true
+      - name: Ship_Date
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Ship_Date
+        datatype: DateTime
+        dimension:
+          is_time: true
+      - name: Ship_Mode
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Ship_Mode
+        datatype: String
+      - name: Customer_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Customer_ID
+        datatype: String
+      - name: Segment
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Segment
+        datatype: String
+      - name: Postal_Code
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Postal_Code
+        datatype: Integer
+      - name: Product_ID
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Product_ID
+        datatype: String
+      - name: Sales
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Sales
+        datatype: Float
+      - name: Quantity
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Quantity
+        datatype: Integer
+      - name: Discount
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Discount
+        datatype: Float
+      - name: Profit
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Profit
+        datatype: Float
+    - name: location
+      source: Lakehouse_1.Schema2.location
+      fields:
+      - name: Postal_Code
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Postal_Code
+        datatype: Integer
+      - name: City
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: City
+        datatype: String
+      - name: State
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: State
+        datatype: String
+      - name: Region
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Region
+        datatype: String
+      - name: Country_Region
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: Country_Region
+        datatype: String
+      primary_key:
+      - Postal_Code
+    relationships:
+    - name: orders_to_customers
+      from: orders
+      to: customers
+      from_columns:
+      - Customer_ID
+      to_columns:
+      - Customer_ID
+    - name: orders_to_products
+      from: orders
+      to: products
+      from_columns:
+      - Product_ID
+      to_columns:
+      - Product_ID
+    - name: orders_to_location
+      from: orders
+      to: location
+      from_columns:
+      - Postal_Code
+      to_columns:
+      - Postal_Code
+  concept_mappings:
+  - concept: SalesTransaction
+    object_mappings:
+    - referent_mappings:
+      - &id001
+        relationship: id
+        expression: orders.Row_ID
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id001
+      children:
+      - object_mapping:
+          concept: OrderNumber
+          expression: orders.Order_ID
+        relationship: order_number
+      - object_mapping:
+          concept: OrderDate
+          expression: orders.Order_Date
+        relationship: ordered_on
+      - object_mapping:
+          concept: ShipDate
+          expression: orders.Ship_Date
+        relationship: shipped_on
+      - object_mapping:
+          concept: ShipMode
+          expression: orders.Ship_Mode
+        relationship: ship_mode
+      - object_mapping:
+          concept: CustomerSegment
+          expression: orders.Segment
+        relationship: segment
+      - object_mapping:
+          concept: SalesAmount
+          expression: orders.Sales
+        relationship: sales_amount
+      - object_mapping:
+          concept: QuantitySold
+          expression: orders.Quantity
+        relationship: quantity
+      - object_mapping:
+          concept: DiscountRate
+          expression: orders.Discount
+        relationship: discount
+      - object_mapping:
+          concept: ProfitAmount
+          expression: orders.Profit
+        relationship: profit
+      - object_mapping:
+          concept: Customer
+          referent_mappings:
+          - relationship: id
+            expression: orders.Customer_ID
+        relationship: placed_by
+      - object_mapping:
+          concept: Product
+          referent_mappings:
+          - relationship: id
+            expression: orders.Product_ID
+        relationship: for_product
+      - object_mapping:
+          concept: Location
+          referent_mappings:
+          - relationship: id
+            expression: orders.Postal_Code
+        relationship: delivered_to
+  - concept: Customer
+    object_mappings:
+    - referent_mappings:
+      - &id002
+        relationship: id
+        expression: customers.Customer_ID
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id002
+      children:
+      - object_mapping:
+          concept: CustomerName
+          expression: customers.Customer_Name
+        relationship: name
+  - concept: Product
+    object_mappings:
+    - referent_mappings:
+      - &id003
+        relationship: id
+        expression: products.Product_ID
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id003
+      children:
+      - object_mapping:
+          concept: ProductCategory
+          expression: products.Category
+        relationship: category
+      - object_mapping:
+          concept: ProductSubCategory
+          expression: products.Sub_Category
+        relationship: sub_category
+      - object_mapping:
+          concept: ProductName
+          expression: products.Product_Name
+        relationship: name
+  - concept: Location
+    object_mappings:
+    - referent_mappings:
+      - &id004
+        relationship: id
+        expression: location.Postal_Code
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id004
+      children:
+      - object_mapping:
+          concept: City
+          expression: location.City
+        relationship: city
+      - object_mapping:
+          concept: State
+          expression: location.State
+        relationship: state
+      - object_mapping:
+          concept: SalesRegion
+          expression: location.Region
+        relationship: region
+      - object_mapping:
+          concept: Country
+          expression: location.Country_Region
+        relationship: country

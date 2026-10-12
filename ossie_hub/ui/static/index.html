@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ossie Hub</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1c2330; --muted: #667085; --line: #dfe3ea;
+    --accent: #1f6feb; --accent-ink: #ffffff; --ok: #1a7f37; --bad: #c4261d; --warn: #9a6700; --soft: #eef3fd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1218; --card: #171c25; --ink: #e8ecf3; --muted: #97a1b3; --line: #2a3140;
+            --accent: #4c8dff; --accent-ink: #0b1220; --ok: #3fb950; --bad: #ff6b60; --warn: #d29922; --soft: #1b2638; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 24px 0; max-width: 1040px; margin: 0 auto; display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 22px; }
+  nav { display: flex; gap: 4px; }
+  nav button { background: none; border: 0; padding: 6px 12px; border-radius: 7px; font: inherit;
+               color: var(--muted); cursor: pointer; }
+  nav button.active { background: var(--soft); color: var(--ink); font-weight: 600; }
+  main { max-width: 1040px; margin: 0 auto; padding: 8px 24px 40px; }
+  .sub { color: var(--muted); margin: 6px 0 16px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tab { padding: 9px 16px; border: 0; background: none; color: var(--muted); cursor: pointer;
+         font: inherit; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+  .tab:disabled { opacity: .5; cursor: not-allowed; }
+  .tab .soon { font-size: 11px; margin-left: 6px; padding: 1px 6px; border-radius: 9px; background: var(--soft); color: var(--muted); }
+  .grid { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 24px; margin-top: 20px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 4px; font-size: 16px; }
+  .card h3 { margin: 14px 0 6px; font-size: 14px; }
+  .desc { color: var(--muted); margin: 0 0 14px; font-size: 13px; }
+  label { display: block; font-weight: 600; font-size: 13px; margin: 12px 0 4px; }
+  .help { color: var(--muted); font-size: 12px; margin: 3px 0 0; }
+  input, select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px;
+                  background: var(--bg); color: var(--ink); font: inherit; }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  select:disabled { opacity: .55; }
+  .req { color: var(--bad); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .row2 { grid-template-columns: 1fr; } }
+  button.primary { margin-top: 16px; padding: 10px 18px; border: 0; border-radius: 7px; background: var(--accent);
+                   color: var(--accent-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  button.primary.full { width: 100%; }
+  button.primary.danger { background: var(--bad); color: #fff; }
+  button.primary:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost { margin-top: 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 7px;
+                 background: none; color: var(--ink); font: inherit; cursor: pointer; }
+  button.link { background: none; border: 0; color: var(--accent); cursor: pointer; font: inherit; padding: 2px 6px; }
+  button.link.danger { color: var(--bad); }
+  .msg { margin-top: 12px; padding: 9px 11px; border-radius: 7px; font-size: 13px; display: none; white-space: pre-wrap; }
+  .msg.ok { display: block; background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .msg.bad { display: block; background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+  .msg.warn { display: block; background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+  .msg.busy { display: block; background: var(--soft); color: var(--muted); }
+  .conn { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; background: var(--card); }
+  .conn .top { display: flex; align-items: center; gap: 8px; }
+  .conn .name { font-weight: 600; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); }
+  .spacer { flex: 1; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.6; }
+  .empty { color: var(--muted); padding: 24px 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok-t { color: var(--ok); font-weight: 600; } .bad-t { color: var(--bad); font-weight: 600; }
+  ol.steps { margin: 6px 0 0; padding-left: 22px; }
+  ol.steps li { margin: 3px 0; }
+  .kind { font-size: 11px; padding: 1px 6px; border-radius: 9px; background: var(--soft); color: var(--muted); margin-right: 6px; }
+  details { margin-top: 4px; } summary { cursor: pointer; color: var(--accent); font-size: 12px; }
+  pre { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 10px; overflow: auto;
+        font-size: 12px; max-height: 260px; }
+  .log { max-height: 220px; }
+  details.adv { margin-top: 14px; } details.adv summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .hidden { display: none; }
+  .check { display: flex; gap: 8px; align-items: center; margin-top: 12px; font-weight: 400; }
+  .check input { width: auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ossie Hub</h1>
+  <nav>
+    <button id="navConn" class="active">Connections</button>
+    <button id="navTrans">Transfer</button>
+  </nav>
+</header>
+<main>
+  <!-- ============================ CONNECTIONS ============================ -->
+  <div id="viewConn">
+    <p class="sub">Connect your platforms once. The app remembers them.</p>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="grid">
+      <section class="card" id="formCard"></section>
+      <section id="listCard"></section>
+    </div>
+  </div>
+
+  <!-- ============================== TRANSFER ============================== -->
+  <div id="viewTrans" class="hidden">
+    <p class="sub">Move a semantic model and its data between two saved connections.</p>
+    <div class="card">
+      <div class="row2">
+        <div>
+          <h2>From: Microsoft Fabric</h2>
+          <label for="tSource">Saved connection</label><select id="tSource"></select>
+          <label for="tWs">Workspace</label><select id="tWs" disabled></select>
+          <label for="tModel">Semantic model</label><select id="tModel" disabled></select>
+        </div>
+        <div>
+          <h2>To: Databricks</h2>
+          <label for="tTarget">Saved connection</label><select id="tTarget"></select>
+          <label for="tCat">Catalog</label><select id="tCat" disabled></select>
+          <label for="tSchema">New schema name</label>
+          <input id="tSchema" list="schemaList" autocomplete="off" placeholder="e.g. superstore_sales">
+          <datalist id="schemaList"></datalist>
+          <div class="help">Existing schemas are suggested; choose a new name to avoid overwriting anything.</div>
+        </div>
+      </div>
+      <div id="noConn" class="msg warn">You need one saved Fabric and one saved Databricks connection first (Connections tab).</div>
+      <button class="primary" id="btnPreview" disabled>Preview plan</button>
+      <div id="tMsg" class="msg"></div>
+    </div>
+
+    <div id="previewCard" class="card hidden">
+      <h2>Plan (nothing has been changed yet)</h2>
+      <p class="desc" id="pvSummary"></p>
+      <h3>Rows read from the source</h3>
+      <table><thead><tr><th>Table</th><th class="num">Rows read</th><th class="num">Repeated keys removed</th><th class="num">Will be loaded</th></tr></thead>
+        <tbody id="pvTables"></tbody></table>
+      <h3>What will be created</h3>
+      <ol class="steps" id="pvSteps"></ol>
+      <div id="pvNotes"></div>
+      <div id="pvConflict" class="msg warn"></div>
+      <label class="check hidden" id="overwriteRow"><input type="checkbox" id="chkOverwrite">
+        Replace the rows in the existing tables listed above</label>
+      <button class="primary danger" id="btnRun">Run transfer…</button>
+    </div>
+
+    <div id="runCard" class="card hidden">
+      <h2 id="runTitle">Transfer</h2>
+      <div id="runMsg" class="msg busy">Starting…</div>
+      <pre class="log" id="runLog"></pre>
+      <div id="runResult"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const H = { "Content-Type": "application/json", "X-Requested-With": "ossie-ui" };
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n[k] = v; else n.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => n.append(c instanceof Node ? c : document.createTextNode(c)));
+  return n;
+};
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, { headers: H, ...opts });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || body.error || r.statusText);
+  return body;
+};
+const when = iso => iso ? new Date(iso).toLocaleString() : "never";
+const num = n => Number(n).toLocaleString();
+
+let connectors = [], soon = [], connections = [], active = null;
+
+/* ---------------------------- navigation ---------------------------- */
+function show(view) {
+  $("#viewConn").classList.toggle("hidden", view !== "conn");
+  $("#viewTrans").classList.toggle("hidden", view !== "trans");
+  $("#navConn").classList.toggle("active", view === "conn");
+  $("#navTrans").classList.toggle("active", view === "trans");
+  if (view === "trans") initTransfer();
+}
+$("#navConn").onclick = () => show("conn");
+$("#navTrans").onclick = () => show("trans");
+
+/* ---------------------------- connections ---------------------------- */
+async function load() {
+  const [c, l] = await Promise.all([api("/api/connectors"), api("/api/connections")]);
+  connectors = c.connectors; soon = c.coming_soon; connections = l.connections;
+  if (!active && connectors.length) active = connectors[0].type;
+  renderTabs(); renderForm(); renderList();
+}
+function renderTabs() {
+  const t = $("#tabs"); t.replaceChildren();
+  connectors.forEach(c => t.append(el("button", {
+    class: "tab" + (c.type === active ? " active" : ""), role: "tab",
+    onclick: () => { active = c.type; renderTabs(); renderForm(); renderList(); } }, c.title)));
+  soon.forEach(s => t.append(el("button", { class: "tab", disabled: "" }, s.title, el("span", { class: "soon" }, "soon"))));
+}
+function visible(field, values) {
+  if (!field.visible_when) return true;
+  return Object.entries(field.visible_when).every(([k, vs]) => vs.includes(values[k] ?? ""));
+}
+function renderForm() {
+  const spec = connectors.find(c => c.type === active), card = $("#formCard");
+  card.replaceChildren();
+  if (!spec) return;
+  card.append(el("h2", {}, "New " + spec.title + " connection"), el("p", { class: "desc" }, spec.description));
+  const values = {};
+  spec.fields.forEach(f => { if (f.default != null) values[f.name] = f.default; });
+  const nameIn = el("input", { id: "f_name", value: active + "-main", autocomplete: "off" });
+  card.append(el("label", {}, "Connection name"), nameIn, el("div", { class: "help" }, "A label for this saved connection."));
+  const holder = el("div"); card.append(holder);
+  const draw = () => {
+    holder.replaceChildren();
+    const advBox = el("details", { class: "adv" }, el("summary", {}, "Advanced options"));
+    let advCount = 0;
+    spec.fields.filter(f => visible(f, values)).forEach(f => {
+      const target = f.advanced ? advBox : holder;
+      if (f.advanced) advCount++;
+      const lab = el("label", { for: "f_" + f.name }, f.label, f.required ? el("span", { class: "req" }, " *") : "");
+      let inp;
+      if (f.type === "select") {
+        inp = el("select", { id: "f_" + f.name }, (f.options || []).map(o => el("option", { value: o }, o)));
+        inp.value = values[f.name] ?? f.options[0]; values[f.name] = inp.value;
+        inp.onchange = () => { values[f.name] = inp.value; draw(); };
+      } else {
+        inp = el("input", { id: "f_" + f.name, type: f.secret ? "password" : "text",
+                            autocomplete: f.secret ? "new-password" : "off", placeholder: f.secret ? "paste it here" : "" });
+        inp.value = values[f.name] ?? ""; inp.oninput = () => { values[f.name] = inp.value; };
+      }
+      target.append(lab, inp);
+      if (f.help) target.append(el("div", { class: "help" }, f.help));
+      if (f.secret) target.append(el("div", { class: "help" }, "Stored in the Windows credential store, not in a file."));
+    });
+    if (advCount) holder.append(advBox);
+  };
+  draw();
+  const msg = el("div", { class: "msg" });
+  const btn = el("button", { class: "primary full", onclick: async () => {
+    const params = {}, secrets = {};
+    spec.fields.filter(f => visible(f, values)).forEach(f => {
+      const v = (values[f.name] ?? "").toString().trim();
+      if (v) (f.secret ? secrets : params)[f.name] = v;
+    });
+    btn.disabled = true; msg.className = "msg busy";
+    msg.textContent = spec.type === "fabric" && params.auth_mode !== "service_principal"
+      ? "Connecting… a Microsoft sign-in window may open." : "Connecting…";
+    try {
+      const r = await api("/api/connections", { method: "POST",
+        body: JSON.stringify({ type: spec.type, name: nameIn.value.trim(), params, secrets }) });
+      msg.className = "msg " + (r.test.ok ? "ok" : "bad");
+      msg.textContent = r.test.ok ? "Connected and saved." : "Saved, but the test failed: " + r.test.error;
+      await refreshList();
+    } catch (e) { msg.className = "msg bad"; msg.textContent = e.message; }
+    btn.disabled = false;
+  } }, "Connect");
+  card.append(btn, msg);
+}
+async function refreshList() { connections = (await api("/api/connections")).connections; renderList(); }
+function renderList() {
+  const box = $("#listCard"); box.replaceChildren();
+  const spec = connectors.find(c => c.type === active);
+  const mine = connections.filter(c => c.type === active);
+  box.append(el("h2", { style: "margin:0 0 10px;font-size:16px" }, (spec ? spec.title : "") + " connections (" + mine.length + ")"));
+  if (!mine.length) { box.append(el("div", { class: "empty" }, "Nothing saved yet. Fill in the form and press Connect.")); return; }
+  mine.forEach(c => {
+    const t = c.last_test, st = !t ? "" : (t.ok ? "ok" : "bad");
+    const details = Object.entries(c.details).map(([k, v]) => k + ": " + v).join("  ·  ");
+    const msg = el("span", { class: "meta" });
+    box.append(el("div", { class: "conn" },
+      el("div", { class: "top" }, el("span", { class: "dot " + st }), el("span", { class: "name" }, c.name), el("span", { class: "spacer" }),
+        el("button", { class: "link", onclick: async (ev) => {
+          ev.target.disabled = true; msg.textContent = "testing…";
+          try { const r = await api("/api/connections/" + encodeURIComponent(c.name) + "/test", { method: "POST" });
+                msg.textContent = r.ok ? "OK" : "failed: " + r.error; } catch (e) { msg.textContent = e.message; }
+          await refreshList(); } }, "Test"),
+        el("button", { class: "link danger", onclick: async () => {
+          if (!confirm("Remove connection '" + c.name + "' and its stored secret?")) return;
+          await api("/api/connections/" + encodeURIComponent(c.name), { method: "DELETE" });
+          await refreshList(); } }, "Remove")),
+      el("div", { class: "meta" }, details),
+      el("div", { class: "meta" }, "Created " + when(c.created_at) + "  ·  Last used " + when(c.last_used_at) +
+        "  ·  Last test: " + (!t ? "never" : (t.ok ? "OK" : "failed") + " " + when(t.at))),
+      t && !t.ok && t.error ? el("div", { class: "meta", style: "color:var(--bad)" }, t.error) : "", msg));
+  });
+}
+
+/* ------------------------------ transfer ------------------------------ */
+const T = { ready: false };
+const fill = (sel, items, placeholder) => {
+  sel.replaceChildren(el("option", { value: "" }, placeholder),
+    ...items.map(i => el("option", { value: i.id ?? i.name }, i.name)));
+  sel.disabled = false;
+};
+const setMsg = (node, cls, text) => { node.className = "msg " + cls; node.textContent = text; };
+const canPreview = () => $("#tSource").value && $("#tTarget").value && $("#tWs").value &&
+  $("#tModel").value && $("#tCat").value && $("#tSchema").value.trim();
+const refreshButtons = () => { $("#btnPreview").disabled = !canPreview(); };
+
+async function initTransfer() {
+  connections = (await api("/api/connections")).connections;
+  const fab = connections.filter(c => c.type === "fabric"), dbx = connections.filter(c => c.type === "databricks");
+  $("#noConn").classList.toggle("hidden", fab.length > 0 && dbx.length > 0);
+  const opt = (sel, list) => { sel.replaceChildren(el("option", { value: "" }, "Choose…"),
+    ...list.map(c => el("option", { value: c.name }, c.name))); if (list.length === 1) sel.value = list[0].name; };
+  opt($("#tSource"), fab); opt($("#tTarget"), dbx);
+  if (!T.ready) {
+    T.ready = true;
+    $("#tSource").onchange = loadWorkspaces; $("#tWs").onchange = loadModels;
+    $("#tTarget").onchange = loadCatalogs; $("#tCat").onchange = loadSchemas;
+    $("#tModel").onchange = () => { if (!$("#tSchema").value) $("#tSchema").value = $("#tModel").value.toLowerCase().replace(/\W+/g, "_") + "_from_fabric"; refreshButtons(); };
+    $("#tSchema").oninput = refreshButtons;
+    $("#btnPreview").onclick = preview; $("#btnRun").onclick = run;
+  }
+  if ($("#tSource").value) loadWorkspaces();
+  if ($("#tTarget").value) loadCatalogs();
+  refreshButtons();
+}
+async function loadWorkspaces() {
+  const ws = $("#tWs"), md = $("#tModel"); md.replaceChildren(); md.disabled = true; refreshButtons();
+  if (!$("#tSource").value) { ws.replaceChildren(); ws.disabled = true; return; }
+  setMsg($("#tMsg"), "busy", "Loading Fabric workspaces… (a sign-in window may open)");
+  try { fill(ws, (await api("/api/fabric/" + encodeURIComponent($("#tSource").value) + "/workspaces")).items, "Choose a workspace…");
+        $("#tMsg").className = "msg"; } catch (e) { setMsg($("#tMsg"), "bad", e.message); }
+}
+async function loadModels() {
+  const md = $("#tModel"); refreshButtons();
+  if (!$("#tWs").value) { md.replaceChildren(); md.disabled = true; return; }
+  setMsg($("#tMsg"), "busy", "Loading semantic models…");
+  try { fill(md, (await api("/api/fabric/" + encodeURIComponent($("#tSource").value) + "/workspaces/" +
+        encodeURIComponent($("#tWs").value) + "/models")).items, "Choose a model…"); $("#tMsg").className = "msg"; }
+  catch (e) { setMsg($("#tMsg"), "bad", e.message); }
+}
+async function loadCatalogs() {
+  const cat = $("#tCat"); refreshButtons();
+  if (!$("#tTarget").value) { cat.replaceChildren(); cat.disabled = true; return; }
+  setMsg($("#tMsg"), "busy", "Loading Databricks catalogs…");
+  try {
+    const r = await api("/api/databricks/" + encodeURIComponent($("#tTarget").value) + "/catalogs");
+    fill(cat, r.items, "Choose a catalog…"); if (r.default) cat.value = r.default; $("#tMsg").className = "msg";
+    if (cat.value) loadSchemas();
+  } catch (e) { setMsg($("#tMsg"), "bad", e.message); }
+  refreshButtons();
+}
+async function loadSchemas() {
+  refreshButtons();
+  if (!$("#tCat").value) return;
+  try { const r = await api("/api/databricks/" + encodeURIComponent($("#tTarget").value) + "/catalogs/" +
+        encodeURIComponent($("#tCat").value) + "/schemas");
+        $("#schemaList").replaceChildren(...r.items.map(i => el("option", { value: i.name }))); } catch (e) {}
+}
+const payload = (extra = {}) => ({ source: $("#tSource").value, target: $("#tTarget").value,
+  workspace: $("#tWs").value, model: $("#tModel").selectedOptions[0]?.textContent || $("#tModel").value,
+  catalog: $("#tCat").value, target_schema: $("#tSchema").value.trim(), ...extra });
+
+async function preview() {
+  const btn = $("#btnPreview"); btn.disabled = true;
+  $("#previewCard").classList.add("hidden"); $("#runCard").classList.add("hidden");
+  setMsg($("#tMsg"), "busy", "Reading the model and the source rows (nothing is written)…");
+  try {
+    const r = await api("/api/transfer/preview", { method: "POST", body: JSON.stringify(payload()) });
+    $("#tMsg").className = "msg";
+    T.last = r;
+    $("#pvSummary").textContent = "Model “" + r.model + "” from workspace “" + r.workspace +
+      "” → " + r.catalog + "." + r.schema + " on Databricks.";
+    $("#pvTables").replaceChildren(...r.tables.map(t => el("tr", {},
+      el("td", {}, t.name), el("td", { class: "num" }, num(t.source_rows)),
+      el("td", { class: "num" }, t.collapsed ? num(t.collapsed) : "–"),
+      el("td", { class: "num" }, num(t.source_rows - t.collapsed)))));
+    $("#pvSteps").replaceChildren(...r.steps.filter(s => s.kind !== "copy_data").map(s =>
+      el("li", {}, el("span", { class: "kind" }, s.kind.replace(/_/g, " ")), s.title,
+        s.sql ? el("details", {}, el("summary", {}, "show SQL"), el("pre", {}, s.sql)) : "")));
+    $("#pvSteps").append(el("li", {}, el("span", { class: "kind" }, "copy data"),
+      "Load the rows above into the new tables, then verify the measures"));
+    $("#pvNotes").replaceChildren();
+    if (r.notes.length) $("#pvNotes").append(el("h3", {}, "Notes"), el("ul", {}, r.notes.map(n => el("li", {}, n))));
+    const conf = $("#pvConflict");
+    if (r.conflicts.length) {
+      setMsg(conf, "warn", "These tables already hold rows in " + r.catalog + "." + r.schema + ": " + r.conflicts.join(", ") +
+        ". Choose a new schema name, or tick the box below to replace their rows.");
+    } else conf.className = "msg";
+    $("#overwriteRow").classList.toggle("hidden", !r.conflicts.length);
+    $("#chkOverwrite").checked = false;
+    $("#previewCard").classList.remove("hidden");
+  } catch (e) { setMsg($("#tMsg"), "bad", e.message); }
+  refreshButtons();
+}
+async function run() {
+  const r = T.last;
+  const overwrite = $("#chkOverwrite").checked;
+  if (r.conflicts.length && !overwrite) { alert("Tables already exist. Choose a new schema or tick the replace box."); return; }
+  const total = r.tables.reduce((a, t) => a + t.source_rows - t.collapsed, 0);
+  if (!confirm("Create schema " + r.catalog + "." + r.schema + " with " + r.tables.length + " tables (" + num(total) +
+      " rows) and a Metric View on Databricks?" + (overwrite ? "\n\nExisting rows in the listed tables WILL BE REPLACED." : ""))) return;
+  $("#btnRun").disabled = true;
+  $("#runCard").classList.remove("hidden"); $("#runResult").replaceChildren();
+  $("#runLog").textContent = ""; setMsg($("#runMsg"), "busy", "Running…"); $("#runTitle").textContent = "Transfer in progress";
+  try {
+    const { job_id } = await api("/api/transfer/run", { method: "POST", body: JSON.stringify(payload({ overwrite, confirm: true })) });
+    for (;;) {
+      await new Promise(r => setTimeout(r, 1500));
+      const j = await api("/api/jobs/" + job_id);
+      $("#runLog").textContent = j.log.join("\n"); $("#runLog").scrollTop = 1e9;
+      if (j.status === "running") continue;
+      if (j.status === "failed") { $("#runTitle").textContent = "Transfer failed"; setMsg($("#runMsg"), "bad", j.error); break; }
+      const res = j.result;
+      $("#runTitle").textContent = res.all_ok ? "Transfer complete and verified" : "Transfer finished with mismatches";
+      setMsg($("#runMsg"), res.all_ok ? "ok" : "bad",
+        (res.all_ok ? "All measures match the source. " : "Some measures do not match. ") + "Created " + res.target + ".");
+      const rows = Object.entries(res.verification).map(([n, c]) => el("tr", {},
+        el("td", {}, n), el("td", { class: "num" }, Number(c.expected).toLocaleString(undefined, { maximumFractionDigits: 2 })),
+        el("td", { class: "num" }, Number(c.got).toLocaleString(undefined, { maximumFractionDigits: 2 })),
+        el("td", { class: c.ok ? "ok-t" : "bad-t" }, c.ok ? "match" : "MISMATCH")));
+      $("#runResult").replaceChildren(el("h3", {}, "Verification: Databricks Metric View vs. source rows"),
+        el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Measure"), el("th", { class: "num" }, "Expected"),
+          el("th", { class: "num" }, "In Databricks"), el("th", {}, ""))), el("tbody", {}, rows)));
+      break;
+    }
+  } catch (e) { $("#runTitle").textContent = "Transfer failed"; setMsg($("#runMsg"), "bad", e.message); }
+  $("#btnRun").disabled = false;
+}
+load();
+</script>
+</body>
+</html>

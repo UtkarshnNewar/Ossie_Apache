@@ -1,0 +1,583 @@
+# yaml-language-server: $schema=../core-spec/ossie-schema.json
+# Apache Ossie Semantic Model Specification
+# Mapped directly from Power BI: Sales_Dashboard.pbix
+# Includes: Orders (Fact), Products (Dimension), Customers (Dimension), and all 31 DAX Measures
+
+version: "0.2.0.dev0"
+
+name: sales_dashboard_model
+description: "Production semantic model synchronized from Power BI Sales_Dashboard.pbix featuring 31 business measures."
+ai_context:
+  instructions: "Use this semantic model to analyze multi-year sales, profit, order counts, customer metrics, and KPI variances."
+  synonyms:
+    - "sales dashboard"
+    - "retail executive analytics"
+
+datasets:
+  # =========================================================================
+  # 1. FACT TABLE: Orders
+  # =========================================================================
+  - name: orders
+    source: sales_db.public.orders
+    primary_key: [row_id]
+    description: "Fact table containing retail sales transactions, revenue, profit, and line items."
+    ai_context:
+      synonyms: ["sales transactions", "orders", "purchases"]
+    fields:
+      - name: row_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "row_id"
+        datatype: Integer
+
+      - name: order_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "order_id"
+        datatype: String
+        ai_context:
+          synonyms: ["order number", "transaction id"]
+
+      - name: order_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "order_date"
+        datatype: DateTime
+        dimension:
+          is_time: true
+        ai_context:
+          synonyms: ["purchase date", "transaction date"]
+
+      - name: ship_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "ship_date"
+        datatype: DateTime
+        dimension:
+          is_time: true
+
+      - name: ship_mode
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "ship_mode"
+        datatype: String
+
+      - name: customer_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "customer_id"
+        datatype: String
+        description: "Foreign key to Customers dimension."
+
+      - name: segment
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "segment"
+        datatype: String
+
+      - name: postal_code
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "postal_code"
+        datatype: Integer
+
+      - name: product_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "product_id"
+        datatype: String
+        description: "Foreign key to Products dimension."
+
+      - name: sales
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "sales"
+        datatype: Decimal
+        description: "Monetary sales amount."
+        ai_context:
+          synonyms: ["revenue", "sales amount", "gross sales"]
+
+      - name: quantity
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "quantity"
+        datatype: Integer
+        ai_context:
+          synonyms: ["units", "quantity sold", "volume"]
+
+      - name: discount
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "discount"
+        datatype: Decimal
+
+      - name: profit
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "profit"
+        datatype: Decimal
+        ai_context:
+          synonyms: ["net earnings", "profit dollars", "margin"]
+
+  # =========================================================================
+  # 2. DIMENSION TABLE: Products
+  # =========================================================================
+  - name: products
+    source: sales_db.public.products
+    primary_key: [product_id]
+    description: "Dimension table containing catalog information for all merchandise."
+    ai_context:
+      synonyms: ["items", "merchandise", "catalog"]
+    fields:
+      - name: product_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "product_id"
+        datatype: String
+
+      - name: category
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "category"
+        datatype: String
+        ai_context:
+          synonyms: ["product category", "department"]
+
+      - name: sub_category
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "sub_category"
+        datatype: String
+        ai_context:
+          synonyms: ["product subcategory", "item group"]
+
+      - name: product_name
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "product_name"
+        datatype: String
+        ai_context:
+          synonyms: ["item name", "product title"]
+
+  # =========================================================================
+  # 3. DIMENSION TABLE: Customers
+  # =========================================================================
+  - name: customers
+    source: sales_db.public.customers
+    primary_key: [customer_id]
+    description: "Dimension table containing customer profiles."
+    ai_context:
+      synonyms: ["clients", "buyers", "accounts"]
+    fields:
+      - name: customer_id
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "customer_id"
+        datatype: String
+
+      - name: customer_name
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "customer_name"
+        datatype: String
+        ai_context:
+          synonyms: ["client name", "buyer name"]
+
+# =========================================================================
+# RELATIONSHIPS
+# =========================================================================
+relationships:
+  - name: orders_to_products
+    from: orders
+    to: products
+    from_columns: [product_id]
+    to_columns: [product_id]
+
+  - name: orders_to_customers
+    from: orders
+    to: customers
+    from_columns: [customer_id]
+    to_columns: [customer_id]
+
+# =========================================================================
+# METRICS / MEASURES (Synchronized from Power BI Desktop - 31 Measures)
+# =========================================================================
+metrics:
+  # --- Base Time Parameters ---
+  - name: selected_year
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "2023"
+    datatype: Integer
+    description: "Selected benchmark year for analytics comparison (Default: 2023)."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "2023", "formatString": "0"}'
+
+  - name: current_year
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "2023"
+    datatype: Integer
+    description: "Current comparison year."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "[Selected Year]", "formatString": "0"}'
+
+  - name: previous_year
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "2022"
+    datatype: Integer
+    description: "Prior comparison year (Current Year - 1)."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "[Selected Year] - 1", "formatString": "0"}'
+
+  # --- Sales Measures (CY, PY, Variance) ---
+  - name: cy_sales
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END)"
+    datatype: Decimal
+    description: "Current Year Sales revenue."
+    ai_context:
+      synonyms: ["current year sales", "this year revenue", "CY revenue"]
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Sales]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Selected Year]))", "formatString": "$#,##0"}'
+
+  - name: py_sales
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END)"
+    datatype: Decimal
+    description: "Prior Year Sales revenue."
+    ai_context:
+      synonyms: ["previous year sales", "last year revenue", "PY revenue"]
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Sales]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Previous Year]))", "formatString": "$#,##0"}'
+
+  - name: pct_diff_sales
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END)) / NULLIF(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END), 0)"
+    datatype: Decimal
+    description: "Percentage difference in Sales between Current Year and Prior Year."
+    ai_context:
+      synonyms: ["sales growth", "sales YoY percentage", "% diff sales"]
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Sales] - [PY Sales], [PY Sales])", "formatString": "0.0%;-0.0%;-"}'
+
+  # --- Profit Measures (CY, PY, Variance) ---
+  - name: cy_profit
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.profit ELSE 0 END)"
+    datatype: Decimal
+    description: "Current Year Net Profit."
+    ai_context:
+      synonyms: ["current year profit", "CY net earnings"]
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Profit]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Selected Year]))", "formatString": "$#,##0"}'
+
+  - name: py_profit
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.profit ELSE 0 END)"
+    datatype: Decimal
+    description: "Prior Year Net Profit."
+    ai_context:
+      synonyms: ["previous year profit", "PY net profit"]
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Profit]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Previous Year]))", "formatString": "$#,##0"}'
+
+  - name: pct_diff_profit
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.profit ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.profit ELSE 0 END)) / NULLIF(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.profit ELSE 0 END), 0)"
+    datatype: Decimal
+    description: "Percentage difference in Profit."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Profit] - [PY Profit], [CY Profit])", "formatString": "0.0%;-0.0%;-"}'
+
+  # --- Quantity Measures (CY, PY, Variance) ---
+  - name: cy_quantity
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.quantity ELSE 0 END)"
+    datatype: Integer
+    description: "Current Year total quantity sold."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Quantity]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Selected Year]))", "formatString": "#,##0"}'
+
+  - name: py_quantity
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.quantity ELSE 0 END)"
+    datatype: Integer
+    description: "Prior Year total quantity sold."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(SUM(\u0027Orders\u0027[Quantity]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Previous Year]))", "formatString": "#,##0"}'
+
+  - name: pct_diff_quantity
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.quantity ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.quantity ELSE 0 END)) / NULLIF(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.quantity ELSE 0 END), 0)"
+    datatype: Decimal
+    description: "Percentage difference in Quantity YoY."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Quantity] - [PY Quantity], [PY Quantity])", "formatString": "0.0%;-0.0%;-"}'
+
+  # --- Order Volume Measures ---
+  - name: cy_orders
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.order_id END)"
+    datatype: Integer
+    description: "Current Year distinct orders count."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(DISTINCTCOUNT(\u0027Orders\u0027[Order ID]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Selected Year]))", "formatString": "#,##0"}'
+
+  - name: py_orders
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.order_id END)"
+    datatype: Integer
+    description: "Prior Year distinct orders count."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(DISTINCTCOUNT(\u0027Orders\u0027[Order ID]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Previous Year]))", "formatString": "#,##0"}'
+
+  - name: pct_diff_orders
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.order_id END) - COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.order_id END)) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.order_id END), 0)"
+    datatype: Decimal
+    description: "Percentage difference in Order count YoY."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Orders] - [PY Orders], [PY Orders])", "formatString": "0.0%;-0.0%;-"}'
+
+  # --- Customer Metrics ---
+  - name: cy_customers
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.customer_id END)"
+    datatype: Integer
+    description: "Current Year active distinct customers."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(DISTINCTCOUNT(\u0027Orders\u0027[Customer ID]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Selected Year]))", "formatString": "#,##0"}'
+
+  - name: py_customers
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END)"
+    datatype: Integer
+    description: "Prior Year active distinct customers."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "CALCULATE(DISTINCTCOUNT(\u0027Orders\u0027[Customer ID]), FILTER(ALL(\u0027Orders\u0027[Order Date]), YEAR(\u0027Orders\u0027[Order Date]) = [Previous Year]))", "formatString": "#,##0"}'
+
+  - name: pct_diff_customers
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.customer_id END) - COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END)) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END), 0)"
+    datatype: Decimal
+    description: "Percentage difference in active customers YoY."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Customers] - [PY Customers], [PY Customers])", "formatString": "0.0%;-0.0%;-"}'
+
+  # --- Customer Productivity / Averages ---
+  - name: cy_sales_per_customer
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.customer_id END), 0)"
+    datatype: Decimal
+    description: "Current Year Average Sales per Customer."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Sales], [CY Customers])", "formatString": "$#,##0"}'
+
+  - name: py_sales_per_customer
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END), 0)"
+    datatype: Decimal
+    description: "Prior Year Average Sales per Customer."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([PY Sales], [PY Customers])", "formatString": "$#,##0"}'
+
+  - name: pct_diff_sales_per_customer
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.customer_id END), 0) - SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END), 0)) / NULLIF(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.customer_id END), 0), 0)"
+    datatype: Decimal
+    description: "YoY Percentage change in Sales per Customer."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Sales per Customer] - [PY Sales per Customer], [PY Sales per Customer])", "formatString": "0.0%;-0.0%;-"}'
+
+  - name: orders_per_customer
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.order_id END) / NULLIF(COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.customer_id END), 0)"
+    datatype: Decimal
+    description: "Average Orders per Customer."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "DIVIDE([CY Orders], [CY Customers])", "formatString": "0.00"}'
+
+  # --- KPI & Benchmark Measures ---
+  - name: kpi_cy_less_py
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END) < SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2022 THEN orders.sales ELSE 0 END) THEN '●' ELSE '' END"
+    datatype: String
+    description: "Visual indicator bullet when Current Year Sales lags Prior Year Sales."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "IF([CY Sales] < [PY Sales], \"●\", \"\")"}'
+
+  - name: kpi_sales_avg
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END) > AVG(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.sales ELSE 0 END)) OVER () THEN 'Above' ELSE 'Below' END"
+    datatype: String
+    description: "Flag indicating whether category sales exceed category average."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Sales] VAR AverageValue = AVERAGEX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Sales])) RETURN IF(CurrentValue > AverageValue, \"Above\", \"Below\")"}'
+
+  - name: kpi_profit_avg
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.profit ELSE 0 END) > AVG(SUM(CASE WHEN EXTRACT(YEAR FROM orders.order_date) = 2023 THEN orders.profit ELSE 0 END)) OVER () THEN 'Above' ELSE 'Below' END"
+    datatype: String
+    description: "Flag indicating whether category profit exceeds category average."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Profit] VAR AverageValue = AVERAGEX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Profit])) RETURN IF(CurrentValue > AverageValue, \"Above\", \"Below\")"}'
+
+  # --- Min/Max Visual Filters ---
+  - name: min_max_sales
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(orders.sales) = MIN(SUM(orders.sales)) OVER () OR SUM(orders.sales) = MAX(SUM(orders.sales)) OVER () THEN SUM(orders.sales) ELSE NULL END"
+    datatype: Decimal
+    description: "Returns sales value only for the minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Sales] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Sales])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Sales])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "$#,##0"}'
+
+  - name: min_max_profit
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(orders.profit) = MIN(SUM(orders.profit)) OVER () OR SUM(orders.profit) = MAX(SUM(orders.profit)) OVER () THEN SUM(orders.profit) ELSE NULL END"
+    datatype: Decimal
+    description: "Returns profit value only for the minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Profit] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Profit])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Profit])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "$#,##0"}'
+
+  - name: min_max_quantity
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN SUM(orders.quantity) = MIN(SUM(orders.quantity)) OVER () OR SUM(orders.quantity) = MAX(SUM(orders.quantity)) OVER () THEN SUM(orders.quantity) ELSE NULL END"
+    datatype: Integer
+    description: "Returns quantity value only for the minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Quantity] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Quantity])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Quantity])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "#,##0"}'
+
+  - name: min_max_orders
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN COUNT(DISTINCT orders.order_id) = MIN(COUNT(DISTINCT orders.order_id)) OVER () OR COUNT(DISTINCT orders.order_id) = MAX(COUNT(DISTINCT orders.order_id)) OVER () THEN COUNT(DISTINCT orders.order_id) ELSE NULL END"
+    datatype: Integer
+    description: "Returns order count only for minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Orders] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Orders])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Orders])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "#,##0"}'
+
+  - name: min_max_customers
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN COUNT(DISTINCT orders.customer_id) = MIN(COUNT(DISTINCT orders.customer_id)) OVER () OR COUNT(DISTINCT orders.customer_id) = MAX(COUNT(DISTINCT orders.customer_id)) OVER () THEN COUNT(DISTINCT orders.customer_id) ELSE NULL END"
+    datatype: Integer
+    description: "Returns customer count only for minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Customers] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Customers])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Customers])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "#,##0"}'
+
+  - name: min_max_sales_per_customers
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: "CASE WHEN (SUM(orders.sales)/NULLIF(COUNT(DISTINCT orders.customer_id),0)) = MIN(SUM(orders.sales)/NULLIF(COUNT(DISTINCT orders.customer_id),0)) OVER () OR (SUM(orders.sales)/NULLIF(COUNT(DISTINCT orders.customer_id),0)) = MAX(SUM(orders.sales)/NULLIF(COUNT(DISTINCT orders.customer_id),0)) OVER () THEN (SUM(orders.sales)/NULLIF(COUNT(DISTINCT orders.customer_id),0)) ELSE NULL END"
+    datatype: Decimal
+    description: "Returns sales per customer only for minimum or maximum category."
+    custom_extensions:
+      - vendor_name: POWERBI
+        data: '{"dax": "VAR CurrentValue = [CY Sales per Customer] VAR MinimumValue = MINX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Sales per Customer])) VAR MaximumValue = MAXX(ALLSELECTED(\u0027Products\u0027[Category]), CALCULATE([CY Sales per Customer])) RETURN IF(CurrentValue = MinimumValue || CurrentValue = MaximumValue, CurrentValue)", "formatString": "$#,##0"}'

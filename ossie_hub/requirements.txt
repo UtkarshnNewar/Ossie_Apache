@@ -1,0 +1,21 @@
+# Ossie Hub: Python 3.11+ (developed on 3.14). Install with:
+#   python -m pip install -r ossie_hub/requirements.txt
+pyyaml>=6.0
+lxml>=5.0
+requests>=2.31
+pydantic>=2.5
+# platform access
+azure-identity>=1.15        # Microsoft Fabric sign-in
+keyring>=24.0               # stores secrets in the OS credential store (Windows Credential Manager)
+deltalake>=1.0              # read/write Delta tables in OneLake
+pyarrow>=15.0
+# Power BI .pbix reader
+pbixray>=0.15
+pandas>=2.0
+# browser UI (python -m ossie_hub ui) and its tests
+fastapi>=0.110
+uvicorn>=0.27
+httpx>=0.27
+# schema validation (validation/validate.py)
+jsonschema>=4.20
+sqlglot>=30.0               # optional: SQL syntax check inside validate.py

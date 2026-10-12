@@ -1,0 +1,549 @@
+# yaml-language-server: $schema=../ontology/ontology.json
+# Ontology derived from sales_dashboard_ossie.yaml by tools/ossie_to_ontology.py
+# Business names live in the tables at the top of that script.
+version: 0.2.0.dev0
+name: sales_dashboard_model_ontology
+description: 'Business ontology of ''sales_dashboard_model'': the business vocabulary (concepts) and how the SalesTransaction
+  fact relates to its dimensions (Product, Customer).'
+ai_context:
+  instructions: Use this semantic model to analyze multi-year sales, profit, order counts, customer metrics, and
+    KPI variances.
+  synonyms:
+  - sales dashboard
+  - retail executive analytics
+ontology:
+- concept: TransactionId
+  type: ValueType
+  extends:
+  - Integer
+- concept: OrderNumber
+  type: ValueType
+  extends:
+  - String
+  description: 'Also known as: order number, transaction id'
+- concept: OrderDate
+  type: ValueType
+  extends:
+  - DateTime
+  description: 'Also known as: purchase date, transaction date'
+- concept: ShipDate
+  type: ValueType
+  extends:
+  - DateTime
+- concept: ShipMode
+  type: ValueType
+  extends:
+  - String
+- concept: CustomerSegment
+  type: ValueType
+  extends:
+  - String
+- concept: PostalCode
+  type: ValueType
+  extends:
+  - Integer
+- concept: SalesAmount
+  type: ValueType
+  extends:
+  - Decimal
+  description: Monetary sales amount.
+- concept: QuantitySold
+  type: ValueType
+  extends:
+  - Integer
+  description: 'Also known as: units, quantity sold, volume'
+- concept: DiscountRate
+  type: ValueType
+  extends:
+  - Decimal
+- concept: ProfitAmount
+  type: ValueType
+  extends:
+  - Decimal
+  description: 'Also known as: net earnings, profit dollars, margin'
+- concept: ProductId
+  type: ValueType
+  extends:
+  - String
+- concept: ProductCategory
+  type: ValueType
+  extends:
+  - String
+  description: 'Also known as: product category, department'
+- concept: ProductSubCategory
+  type: ValueType
+  extends:
+  - String
+  description: 'Also known as: product subcategory, item group'
+- concept: ProductName
+  type: ValueType
+  extends:
+  - String
+  description: 'Also known as: item name, product title'
+- concept: CustomerId
+  type: ValueType
+  extends:
+  - String
+- concept: CustomerName
+  type: ValueType
+  extends:
+  - String
+  description: 'Also known as: client name, buyer name'
+- concept: SalesTransaction
+  type: EntityType
+  description: 'Business name: Sales Transaction. Fact table containing retail sales transactions, revenue, profit,
+    and line items. Also known as: sales transactions, orders, purchases. (fact; source dataset ''orders'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: TransactionId
+    verbalizes:
+    - '{SalesTransaction} is identified by {TransactionId}'
+    multiplicity: OneToOne
+  - name: order_number
+    roles:
+    - concept: OrderNumber
+    verbalizes:
+    - '{SalesTransaction} has {OrderNumber}'
+    multiplicity: ManyToOne
+  - name: ordered_on
+    roles:
+    - concept: OrderDate
+    verbalizes:
+    - '{SalesTransaction} has {OrderDate}'
+    multiplicity: ManyToOne
+  - name: shipped_on
+    roles:
+    - concept: ShipDate
+    verbalizes:
+    - '{SalesTransaction} has {ShipDate}'
+    multiplicity: ManyToOne
+  - name: ship_mode
+    roles:
+    - concept: ShipMode
+    verbalizes:
+    - '{SalesTransaction} has {ShipMode}'
+    multiplicity: ManyToOne
+  - name: segment
+    roles:
+    - concept: CustomerSegment
+    verbalizes:
+    - '{SalesTransaction} has {CustomerSegment}'
+    multiplicity: ManyToOne
+  - name: postal_code
+    roles:
+    - concept: PostalCode
+    verbalizes:
+    - '{SalesTransaction} has {PostalCode}'
+    multiplicity: ManyToOne
+  - name: sales_amount
+    roles:
+    - concept: SalesAmount
+    verbalizes:
+    - '{SalesTransaction} has {SalesAmount}'
+    multiplicity: ManyToOne
+  - name: quantity
+    roles:
+    - concept: QuantitySold
+    verbalizes:
+    - '{SalesTransaction} has {QuantitySold}'
+    multiplicity: ManyToOne
+  - name: discount
+    roles:
+    - concept: DiscountRate
+    verbalizes:
+    - '{SalesTransaction} has {DiscountRate}'
+    multiplicity: ManyToOne
+  - name: profit
+    roles:
+    - concept: ProfitAmount
+    verbalizes:
+    - '{SalesTransaction} has {ProfitAmount}'
+    multiplicity: ManyToOne
+  - name: for_product
+    description: 'Each SalesTransaction belongs to exactly one Product (many SalesTransaction records per Product).
+      Join: orders.product_id = products.product_id.'
+    roles:
+    - concept: Product
+    verbalizes:
+    - '{SalesTransaction} is for {Product}'
+    - '{Product} is sold in {SalesTransaction}'
+    multiplicity: ManyToOne
+  - name: placed_by
+    description: 'Each SalesTransaction belongs to exactly one Customer (many SalesTransaction records per Customer).
+      Join: orders.customer_id = customers.customer_id.'
+    roles:
+    - concept: Customer
+    verbalizes:
+    - '{SalesTransaction} is placed by {Customer}'
+    - '{Customer} places {SalesTransaction}'
+    multiplicity: ManyToOne
+- concept: Product
+  type: EntityType
+  description: 'Business name: Product. Dimension table containing catalog information for all merchandise. Also
+    known as: items, merchandise, catalog. (dimension; source dataset ''products'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: ProductId
+    verbalizes:
+    - '{Product} is identified by {ProductId}'
+    multiplicity: OneToOne
+  - name: category
+    roles:
+    - concept: ProductCategory
+    verbalizes:
+    - '{Product} has {ProductCategory}'
+    multiplicity: ManyToOne
+  - name: sub_category
+    roles:
+    - concept: ProductSubCategory
+    verbalizes:
+    - '{Product} has {ProductSubCategory}'
+    multiplicity: ManyToOne
+  - name: name
+    roles:
+    - concept: ProductName
+    verbalizes:
+    - '{Product} has {ProductName}'
+    multiplicity: ManyToOne
+- concept: Customer
+  type: EntityType
+  description: 'Business name: Customer. Dimension table containing customer profiles. Also known as: clients, buyers,
+    accounts. (dimension; source dataset ''customers'')'
+  identify_by:
+  - id
+  relationships:
+  - name: id
+    roles:
+    - concept: CustomerId
+    verbalizes:
+    - '{Customer} is identified by {CustomerId}'
+    multiplicity: OneToOne
+  - name: name
+    roles:
+    - concept: CustomerName
+    verbalizes:
+    - '{Customer} has {CustomerName}'
+    multiplicity: ManyToOne
+ontology_mappings:
+- name: sales_dashboard_model_mapping
+  description: Binds each ontology concept and relationship to fields of the semantic model it was derived from.
+  semantic_model:
+    version: "0.2.0.dev0"
+    name: sales_dashboard_model
+    datasets:
+    - name: orders
+      source: sales_db.public.orders
+      primary_key:
+      - row_id
+      description: Fact table containing retail sales transactions, revenue, profit, and line items.
+      ai_context:
+        synonyms:
+        - sales transactions
+        - orders
+        - purchases
+      fields:
+      - name: row_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: row_id
+        datatype: Integer
+      - name: order_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: order_id
+        datatype: String
+        ai_context:
+          synonyms:
+          - order number
+          - transaction id
+      - name: order_date
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: order_date
+        datatype: DateTime
+        dimension:
+          is_time: true
+        ai_context:
+          synonyms:
+          - purchase date
+          - transaction date
+      - name: ship_date
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: ship_date
+        datatype: DateTime
+        dimension:
+          is_time: true
+      - name: ship_mode
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: ship_mode
+        datatype: String
+      - name: customer_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: customer_id
+        datatype: String
+        description: Foreign key to Customers dimension.
+      - name: segment
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: segment
+        datatype: String
+      - name: postal_code
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: postal_code
+        datatype: Integer
+      - name: product_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: product_id
+        datatype: String
+        description: Foreign key to Products dimension.
+      - name: sales
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: sales
+        datatype: Decimal
+        description: Monetary sales amount.
+        ai_context:
+          synonyms:
+          - revenue
+          - sales amount
+          - gross sales
+      - name: quantity
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: quantity
+        datatype: Integer
+        ai_context:
+          synonyms:
+          - units
+          - quantity sold
+          - volume
+      - name: discount
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: discount
+        datatype: Decimal
+      - name: profit
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: profit
+        datatype: Decimal
+        ai_context:
+          synonyms:
+          - net earnings
+          - profit dollars
+          - margin
+    - name: products
+      source: sales_db.public.products
+      primary_key:
+      - product_id
+      description: Dimension table containing catalog information for all merchandise.
+      ai_context:
+        synonyms:
+        - items
+        - merchandise
+        - catalog
+      fields:
+      - name: product_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: product_id
+        datatype: String
+      - name: category
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: category
+        datatype: String
+        ai_context:
+          synonyms:
+          - product category
+          - department
+      - name: sub_category
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: sub_category
+        datatype: String
+        ai_context:
+          synonyms:
+          - product subcategory
+          - item group
+      - name: product_name
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: product_name
+        datatype: String
+        ai_context:
+          synonyms:
+          - item name
+          - product title
+    - name: customers
+      source: sales_db.public.customers
+      primary_key:
+      - customer_id
+      description: Dimension table containing customer profiles.
+      ai_context:
+        synonyms:
+        - clients
+        - buyers
+        - accounts
+      fields:
+      - name: customer_id
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: customer_id
+        datatype: String
+      - name: customer_name
+        expression:
+          dialects:
+          - dialect: ANSI_SQL
+            expression: customer_name
+        datatype: String
+        ai_context:
+          synonyms:
+          - client name
+          - buyer name
+    relationships:
+    - name: orders_to_products
+      from: orders
+      to: products
+      from_columns:
+      - product_id
+      to_columns:
+      - product_id
+    - name: orders_to_customers
+      from: orders
+      to: customers
+      from_columns:
+      - customer_id
+      to_columns:
+      - customer_id
+  concept_mappings:
+  - concept: SalesTransaction
+    object_mappings:
+    - referent_mappings:
+      - &id001
+        relationship: id
+        expression: orders.row_id
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id001
+      children:
+      - object_mapping:
+          concept: OrderNumber
+          expression: orders.order_id
+        relationship: order_number
+      - object_mapping:
+          concept: OrderDate
+          expression: orders.order_date
+        relationship: ordered_on
+      - object_mapping:
+          concept: ShipDate
+          expression: orders.ship_date
+        relationship: shipped_on
+      - object_mapping:
+          concept: ShipMode
+          expression: orders.ship_mode
+        relationship: ship_mode
+      - object_mapping:
+          concept: CustomerSegment
+          expression: orders.segment
+        relationship: segment
+      - object_mapping:
+          concept: PostalCode
+          expression: orders.postal_code
+        relationship: postal_code
+      - object_mapping:
+          concept: SalesAmount
+          expression: orders.sales
+        relationship: sales_amount
+      - object_mapping:
+          concept: QuantitySold
+          expression: orders.quantity
+        relationship: quantity
+      - object_mapping:
+          concept: DiscountRate
+          expression: orders.discount
+        relationship: discount
+      - object_mapping:
+          concept: ProfitAmount
+          expression: orders.profit
+        relationship: profit
+      - object_mapping:
+          concept: Product
+          referent_mappings:
+          - relationship: id
+            expression: orders.product_id
+        relationship: for_product
+      - object_mapping:
+          concept: Customer
+          referent_mappings:
+          - relationship: id
+            expression: orders.customer_id
+        relationship: placed_by
+  - concept: Product
+    object_mappings:
+    - referent_mappings:
+      - &id002
+        relationship: id
+        expression: products.product_id
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id002
+      children:
+      - object_mapping:
+          concept: ProductCategory
+          expression: products.category
+        relationship: category
+      - object_mapping:
+          concept: ProductSubCategory
+          expression: products.sub_category
+        relationship: sub_category
+      - object_mapping:
+          concept: ProductName
+          expression: products.product_name
+        relationship: name
+  - concept: Customer
+    object_mappings:
+    - referent_mappings:
+      - &id003
+        relationship: id
+        expression: customers.customer_id
+    link_mappings:
+    - object_mapping:
+        referent_mappings:
+        - *id003
+      children:
+      - object_mapping:
+          concept: CustomerName
+          expression: customers.customer_name
+        relationship: name

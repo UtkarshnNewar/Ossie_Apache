@@ -35,3 +35,10 @@ cli/.tool-versions
 
 # Apache RAT (downloaded by dev/check-license)
 dev/lib/
+
+# local connection profiles / credentials (never commit)
+.ossie_hub/
+.env
+
+# saved connections per connector (details only; secrets live in the OS credential store)
+ossie_hub/connectors/*/connections/*.json

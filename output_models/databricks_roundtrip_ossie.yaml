@@ -1,0 +1,251 @@
+# yaml-language-server: $schema=../core-spec/ossie-schema.json
+version: 0.2.0.dev0
+name: sales_metrics
+description: Converted from Fabric semantic model TMDL (sales).
+datasets:
+- name: orders
+  source: workspace.ossie_superstore_lakehouse.orders
+  fields:
+  - name: Row_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Row_ID
+    datatype: Integer
+  - name: Order_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Order_ID
+    datatype: String
+  - name: Order_Date
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Order_Date
+    datatype: DateTime
+  - name: Ship_Date
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Ship_Date
+    datatype: DateTime
+  - name: Ship_Mode
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Ship_Mode
+    datatype: String
+  - name: Customer_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Customer_ID
+    datatype: String
+  - name: Segment
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Segment
+    datatype: String
+  - name: Postal_Code
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Postal_Code
+    datatype: Integer
+  - name: Product_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Product_ID
+    datatype: String
+  - name: Sales
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Sales
+    datatype: Float
+  - name: Quantity
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Quantity
+    datatype: Integer
+  - name: Discount
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Discount
+    datatype: Float
+  - name: Profit
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Profit
+    datatype: Float
+- name: customers
+  source: workspace.ossie_superstore_lakehouse.customers
+  unique_keys:
+  - - Customer_ID
+  fields:
+  - name: customers_Customer_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Customer_ID
+    datatype: String
+  - name: Customer_Name
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Customer_Name
+    datatype: String
+- name: location
+  source: workspace.ossie_superstore_lakehouse.location
+  unique_keys:
+  - - Postal_Code
+  fields:
+  - name: location_Postal_Code
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Postal_Code
+    datatype: Integer
+  - name: City
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: City
+    datatype: String
+  - name: State
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: State
+    datatype: String
+  - name: Region
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Region
+    datatype: String
+  - name: Country_Region
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Country_Region
+    datatype: String
+  - name: Alternate_Records
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Alternate_Records
+    description: Other records that shared this key in the source data (kept for audit;
+      collapsed to one row per key).
+    datatype: String
+- name: products
+  source: workspace.ossie_superstore_lakehouse.products
+  unique_keys:
+  - - Product_ID
+  fields:
+  - name: products_Product_ID
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Product_ID
+    datatype: String
+  - name: Category
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Category
+    datatype: String
+  - name: Sub_Category
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Sub_Category
+    datatype: String
+  - name: Product_Name
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Product_Name
+    datatype: String
+  - name: products_Alternate_Records
+    expression:
+      dialects:
+      - dialect: DATABRICKS
+        expression: Alternate_Records
+    description: Other records that shared this key in the source data (kept for audit;
+      collapsed to one row per key).
+    datatype: String
+relationships:
+- name: sales_metrics_to_customers
+  from: orders
+  to: customers
+  from_columns:
+  - Customer_ID
+  to_columns:
+  - Customer_ID
+  custom_extensions:
+  - vendor_name: DATABRICKS
+    data: '{"_v": 1, "rely": {"at_most_one_match": true}}'
+- name: sales_metrics_to_location
+  from: orders
+  to: location
+  from_columns:
+  - Postal_Code
+  to_columns:
+  - Postal_Code
+  custom_extensions:
+  - vendor_name: DATABRICKS
+    data: '{"_v": 1, "rely": {"at_most_one_match": true}}'
+- name: sales_metrics_to_products
+  from: orders
+  to: products
+  from_columns:
+  - Product_ID
+  to_columns:
+  - Product_ID
+  custom_extensions:
+  - vendor_name: DATABRICKS
+    data: '{"_v": 1, "rely": {"at_most_one_match": true}}'
+metrics:
+- name: total_sales
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: SUM(Sales)
+  description: Sum of sales amount across all orders.
+- name: total_profit
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: SUM(Profit)
+  description: Sum of profit across all orders.
+- name: total_quantity
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: SUM(Quantity)
+  description: Total units sold.
+- name: order_count
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: COUNT(DISTINCT Order_ID)
+  description: Count of distinct orders.
+- name: profit_margin
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: SUM(Profit) / NULLIF(SUM(Sales), 0)
+  description: Profit divided by sales.
+- name: avg_discount
+  expression:
+    dialects:
+    - dialect: DATABRICKS
+      expression: AVG(Discount)
+  description: Average discount rate applied across order lines.
